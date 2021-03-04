@@ -58,13 +58,10 @@ func (s *GoogleDriveService) buildQuerySearchFile(filePath string) string {
 }
 
 // TODO remove search for sharedRootFolder
-// FilePath format: x/y/z/t.a Return fileID, isExisted, error
-func (s *GoogleDriveService) IsExistedByFilePath(filePath string) (string, bool, error) {
+// Return fileID, isExisted, error
+func (s *GoogleDriveService) GetFileIDByPath(filePath string) (string, bool, error) {
 	listFileInPath := strings.Split(filePath, "/")
 	numPathLevel := len(listFileInPath)
-	if !s.validateFilePath(filePath) {
-		return "", false, nil
-	}
 	query := s.buildQuerySearchFile(filePath)
 	fileList, err := s.service.Files.List().Fields("files(id, name, parents)").Q(query).Do()
 	if err != nil {
@@ -99,7 +96,7 @@ func (s *GoogleDriveService) IsExistedByFilePath(filePath string) (string, bool,
 }
 
 func (s *GoogleDriveService) GetStreamSourceByFilePath(filePath string) (io.Reader, error) {
-	id, existed, err := s.IsExistedByFilePath(filePath)
+	id, existed, err := s.GetFileIDByPath(filePath)
 	if err != nil {
 		return nil, err
 	}

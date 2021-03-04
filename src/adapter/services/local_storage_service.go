@@ -18,11 +18,15 @@ func NewLocalStorageService(rootFolder string, cacheTime time.Duration) *LocalSt
 	}
 }
 
-func (s *LocalStorageService) IsExist(filePath string) bool {
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return false
+func (s *LocalStorageService) IsExisted(filePath string) (bool, error) {
+	_, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		return false, nil
 	}
-	return true
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (s *LocalStorageService) GetStreamSourceByFilePath(filePath string) (io.Reader, error) {
