@@ -10,7 +10,7 @@ type GoogleDriveService struct {
 	sharedFolder string
 }
 
-func NewGoogleDriveClient(ctx context.Context, sharedFolder string) (*GoogleDriveService, error){
+func NewGoogleDriveClientWithServiceAccount(ctx context.Context, sharedFolder string) (*GoogleDriveService, error){
 	service, err := drive.NewService(ctx)
 	if err != nil {
 		return nil, err
