@@ -3,6 +3,7 @@ package adapter
 import (
 	"io"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -50,7 +51,19 @@ func (s *LocalFileSystem) NewFileAndStream(filePath string, dataSource io.Reader
 }
 
 func (s *LocalFileSystem) NewFile(filePath string) (io.Writer, error) {
-	w, err := os.Create(s.rootFolder + "/" + filePath)
+	lastFile := ""
+	directory := ""
+	files := strings.Split(filePath, "/")
+	if len(files) > 1 {
+		lastFile = files[len(files)-1]
+		directory = strings.Join(files[0:len(files)-1], "/")
+		err := os.MkdirAll(s.rootFolder+"/"+directory, 0770)
+		if err != nil {
+			return nil, err
+		}
+		directory += "/"
+	}
+	w, err := os.Create(s.rootFolder + "/" + directory + lastFile)
 	if err != nil {
 		return nil, err
 	}

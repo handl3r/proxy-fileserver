@@ -48,6 +48,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		err = s.StreamFromDriveToLocalFileSystem(id, filePath)
 		if err != nil {
 			log.Errorf("Failure when streaming file from drive to local file system with filepath: %s, id: %s, err: %v", filePath, id, err)
+			return
 		}
 		log.Infof("Finished streaming file from drive to local file system with filepath: %s, id: %s", filePath, id)
 	}()
@@ -86,6 +87,7 @@ func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string)
 		err = s.StreamFromDriveToLocalFileSystem(id, filePath)
 		if err != nil {
 			log.Errorf("Failure when streaming file from drive to local file system with filepath: %s, id: %s, err: %v", filePath, id, err)
+			return
 		}
 		log.Infof("Finished getting new file from drive to local server with filepath: %s, id: %s", filePath, id)
 	}()
