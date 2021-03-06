@@ -1,4 +1,4 @@
-package services
+package adapter
 
 import (
 	"context"
@@ -20,14 +20,15 @@ type TreeNode struct {
 	ID   string
 }
 
-func NewGoogleDriveFileSystem(ctx context.Context, sharedFolder string) (*GoogleDriveFileSystem, error) {
+func NewGoogleDriveFileSystem(ctx context.Context, sharedRootFolder, sharedRootFolderID string) (*GoogleDriveFileSystem, error) {
 	service, err := drive.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return &GoogleDriveFileSystem{
-		service:          service,
-		sharedRootFolder: sharedFolder,
+		service:            service,
+		sharedRootFolder:   sharedRootFolder,
+		sharedRootFolderID: sharedRootFolderID,
 	}, nil
 }
 

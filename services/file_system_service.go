@@ -2,19 +2,19 @@ package services
 
 import (
 	"io"
+	"proxy-fileserver/adapter"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/enums"
-	"proxy-fileserver/src/adapter/services"
 	"strings"
 )
 
 type FileSystemService struct {
 	rootFolder            string
-	GoogleDriveFileSystem services.GoogleDriveFileSystem
-	LocalFileSystem       services.LocalFileSystem
+	GoogleDriveFileSystem adapter.GoogleDriveFileSystem
+	LocalFileSystem       adapter.LocalFileSystem
 }
 
-func NewLocalStorageService(rootFolder string, googleDrive services.GoogleDriveFileSystem, localStorage services.LocalFileSystem) *FileSystemService {
+func NewLocalStorageService(rootFolder string, googleDrive adapter.GoogleDriveFileSystem, localStorage adapter.LocalFileSystem) *FileSystemService {
 	return &FileSystemService{
 		GoogleDriveFileSystem: googleDrive,
 		LocalFileSystem:       localStorage,
@@ -22,17 +22,17 @@ func NewLocalStorageService(rootFolder string, googleDrive services.GoogleDriveF
 }
 
 // StreamFile Public method control all process to stream file to client and sync file from drive to local server
-func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string) error {
+func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string) enums.Response {
 	existed, err := s.LocalFileSystem.IsExisted(filePath)
 	if err != nil {
 		log.Errorf("Can not check if file exist from file %s with error: %v", filePath, err)
-		return err
+		return enums.ErrorSystem
 	}
 	if existed {
 		err := s.StreamFromFileSystem(outStreamHttp, filePath)
 		if err != nil {
 			log.Errorf("Failure when streaming file from local server to client with filepath: %s", filePath)
-			return err
+			return enums.ErrorSystem
 		}
 		log.Infof("Finish stream file %s from  local file system to client", filePath)
 		return nil
@@ -40,11 +40,11 @@ func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string)
 
 	id, srcStream, err := s.GoogleDriveFileSystem.GetStreamSourceByFilePath(filePath)
 	if err == enums.ErrFileNotExist {
-		return enums.ErrFileNotExist
+		return enums.ErrorNoContent
 	}
 	if err != nil {
 		log.Errorf("Can not get source stream from drive with file path %s, id %s , error: %v", filePath, id, err)
-		return err
+		return enums.ErrorSystem
 	}
 	// TODO make new function to stream from reader to multi writer with condition: when 1 writer is failure, another still continue
 	go func() {
@@ -57,7 +57,7 @@ func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string)
 	_, err = io.Copy(outStreamHttp, srcStream)
 	if err != nil {
 		log.Errorf("Error when streaming file from driver to client with filePath: %s, id: %s, error: %s", filePath, id, err)
-		return err
+		return enums.ErrorSystem
 	}
 	log.Errorf("Finished stream file from drive to client with filepath: %s, id: %s", filePath, id)
 	return nil
