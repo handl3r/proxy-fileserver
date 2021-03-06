@@ -9,12 +9,11 @@ import (
 )
 
 type FileSystemService struct {
-	rootFolder            string
-	GoogleDriveFileSystem adapter.GoogleDriveFileSystem
-	LocalFileSystem       adapter.LocalFileSystem
+	GoogleDriveFileSystem *adapter.GoogleDriveFileSystem
+	LocalFileSystem       *adapter.LocalFileSystem
 }
 
-func NewLocalStorageService(rootFolder string, googleDrive adapter.GoogleDriveFileSystem, localStorage adapter.LocalFileSystem) *FileSystemService {
+func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem) *FileSystemService {
 	return &FileSystemService{
 		GoogleDriveFileSystem: googleDrive,
 		LocalFileSystem:       localStorage,
