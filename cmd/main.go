@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"proxy-fileserver/api"
+	"proxy-fileserver/bootstrap"
 	"proxy-fileserver/common/config"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/configs"
@@ -19,7 +22,10 @@ func main() {
 	config.LoadEnvironments()
 	configs.LoadConfigs()
 	_initLogger()
-
+	ctx := context.Background()
+	appContext := bootstrap.InitService(ctx)
+	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider)
+	_ = router.Run(":8080")
 
 }
 

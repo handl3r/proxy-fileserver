@@ -1,2 +1,3 @@
 certificates/*
 .env
+temp/shared-folder/*

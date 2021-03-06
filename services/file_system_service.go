@@ -58,7 +58,7 @@ func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string)
 		log.Errorf("Error when streaming file from driver to client with filePath: %s, id: %s, error: %s", filePath, id, err)
 		return enums.ErrorSystem
 	}
-	log.Errorf("Finished stream file from drive to client with filepath: %s, id: %s", filePath, id)
+	log.Infof("Finished stream file from drive to client with filepath: %s, id: %s", filePath, id)
 	return nil
 }
 

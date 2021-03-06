@@ -14,8 +14,8 @@ type Context struct {
 }
 
 type AppContext struct {
-	AdapterProvider adapter.ProviderAdapter
-	serviceProvider services.ServiceProvider
-	controllerProvider controllers.ControllerProvider
-	middlewareProvider middlewares.MiddlewareProvider
+	AdapterProvider    adapter.ProviderAdapter
+	ServiceProvider    services.ServiceProvider
+	ControllerProvider controllers.ControllerProvider
+	MiddlewareProvider middlewares.MiddlewareProvider
 }

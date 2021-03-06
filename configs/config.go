@@ -11,6 +11,8 @@ type Config struct {
 	SharedRootFolderID       string
 	SharedRootFolderLocal    string
 	CacheTimeLocalFileSystem time.Duration
+
+	AuthPublicKey string
 }
 
 var Common *Config
@@ -30,5 +32,7 @@ func LoadConfigs() {
 		SharedRootFolderID:       config.GetString("SHARED_ROOT_FOLDER_ID"),
 		SharedRootFolderLocal:    config.GetString("SHARED_ROOT_FOLDER_LOCAL"),
 		CacheTimeLocalFileSystem: cacheTimeLocalFileSystem,
+
+		AuthPublicKey: config.GetString("AUTH_PUBLIC_KEY"),
 	}
 }

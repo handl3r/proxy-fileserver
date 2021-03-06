@@ -8,7 +8,7 @@ import (
 
 func NewRouterWithMiddleware(controllerProvider controllers.ControllerProvider, middlewareProvider middlewares.MiddlewareProvider) *gin.Engine {
 	router := gin.Default()
-	router.GET("/", controllerProvider.GetStreamFileController().GetFile)
+	router.NoRoute(controllerProvider.GetStreamFileController().GetFile)
 	router.Use(middlewareProvider.GetAuthorizationProcessor().ValidateRequest)
 	return router
 }

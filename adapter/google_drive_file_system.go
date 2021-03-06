@@ -53,7 +53,7 @@ func (s *GoogleDriveFileSystem) buildQuerySearchFile(filePath string) string {
 		subQuery := fmt.Sprintf("(name = '%s' and mimeType = 'application/vnd.google-apps.folder')", file)
 		subQueries = append(subQueries, subQuery)
 	}
-	lastQuery := fmt.Sprintf("(name = '%s' and mimeType =! 'application/vnd.google-apps.folder')", files[len(files)-1])
+	lastQuery := fmt.Sprintf("(name = '%s' and mimeType != 'application/vnd.google-apps.folder')", files[len(files)-1])
 	subQueries = append(subQueries, lastQuery)
 	return strings.Join(subQueries, " or ")
 }
@@ -78,7 +78,7 @@ func (s *GoogleDriveFileSystem) GetFileIDByPath(filePath string) (string, bool, 
 	for _, fileInPath := range listFileInPath[1:] {
 		existedNode := false
 		for _, file := range fileList.Files {
-			if file.Name == fileInPath && file.Id == preNodeID {
+			if file.Name == fileInPath && file.Parents[0] == preNodeID {
 				preNodeID = file.Id
 				lastFileID = file.Id
 				existedNode = true

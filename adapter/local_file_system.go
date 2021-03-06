@@ -19,7 +19,7 @@ func NewLocalFileSystem(rootFolder string, cacheTime time.Duration) *LocalFileSy
 }
 
 func (s *LocalFileSystem) IsExisted(filePath string) (bool, error) {
-	_, err := os.Stat(filePath)
+	_, err := os.Stat(s.rootFolder + "/" + filePath)
 	if os.IsNotExist(err) {
 		return false, nil
 	}
@@ -30,7 +30,7 @@ func (s *LocalFileSystem) IsExisted(filePath string) (bool, error) {
 }
 
 func (s *LocalFileSystem) GetStreamSourceByFilePath(filePath string) (io.Reader, error) {
-	file, err := os.Open(filePath)
+	file, err := os.Open(s.rootFolder + "/" + filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (s *LocalFileSystem) GetStreamSourceByFilePath(filePath string) (io.Reader,
 }
 
 func (s *LocalFileSystem) NewFileAndStream(filePath string, dataSource io.Reader) error {
-	w, err := os.Create(filePath)
+	w, err := os.Create(s.rootFolder + "/" + filePath)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (s *LocalFileSystem) NewFileAndStream(filePath string, dataSource io.Reader
 }
 
 func (s *LocalFileSystem) NewFile(filePath string) (io.Writer, error) {
-	w, err := os.Create(filePath)
+	w, err := os.Create(s.rootFolder + "/" + filePath)
 	if err != nil {
 		return nil, err
 	}
