@@ -20,6 +20,42 @@ func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStora
 	}
 }
 
+// Use for gin
+func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.Response) {
+	existed, err := s.LocalFileSystem.IsExisted(filePath)
+	if err != nil {
+		log.Errorf("Failure when checking if file exist from local file system %s with error: %v", filePath, err)
+		return nil, enums.ErrorSystem
+	}
+	if existed {
+		srcStream, err := s.GetSourceStreamFromLocalFileSystem(filePath)
+		if err != nil {
+			log.Errorf("Failure getting source stream file on local file system with filepath: %s, err: %s", filePath, err)
+			return nil, enums.ErrorSystem
+		}
+		return srcStream, nil
+	}
+
+	id, srcStream, err := s.GoogleDriveFileSystem.GetStreamSourceByFilePath(filePath)
+	if err == enums.ErrFileNotExist {
+		return nil, enums.ErrorNoContent
+	}
+	if err != nil {
+		log.Errorf("Failure getting source stream from drive with path %s, id %s , error: %v", filePath, id, err)
+		return nil, enums.ErrorSystem
+	}
+	go func() {
+		err = s.StreamFromDriveToLocalFileSystem(id, filePath)
+		if err != nil {
+			log.Errorf("Failure when streaming file from drive to local file system with filepath: %s, id: %s, err: %v", filePath, id, err)
+		}
+		log.Infof("Finished streaming file from drive to local file system with filepath: %s, id: %s", filePath, id)
+	}()
+	return srcStream, nil
+
+}
+
+// Use only for HTTP Basic
 // StreamFile Public method control all process to stream file to client and sync file from drive to local server
 func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string) enums.Response {
 	existed, err := s.LocalFileSystem.IsExisted(filePath)
@@ -28,7 +64,7 @@ func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string)
 		return enums.ErrorSystem
 	}
 	if existed {
-		err := s.StreamFromFileSystem(outStreamHttp, filePath)
+		err := s.StreamFromLocalFileSystem(outStreamHttp, filePath)
 		if err != nil {
 			log.Errorf("Failure when streaming file from local server to client with filepath: %s", filePath)
 			return enums.ErrorSystem
@@ -48,10 +84,10 @@ func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string)
 	// TODO make new function to stream from reader to multi writer with condition: when 1 writer is failure, another still continue
 	go func() {
 		err = s.StreamFromDriveToLocalFileSystem(id, filePath)
-		if err == nil {
-			log.Infof("Finished getting new file from drive to local server with filepath: %s, id: %s", filePath, id)
+		if err != nil {
+			log.Errorf("Failure when streaming file from drive to local file system with filepath: %s, id: %s, err: %v", filePath, id, err)
 		}
-
+		log.Infof("Finished getting new file from drive to local server with filepath: %s, id: %s", filePath, id)
 	}()
 	_, err = io.Copy(outStreamHttp, srcStream)
 	if err != nil {
@@ -62,41 +98,39 @@ func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string)
 	return nil
 }
 
-func (s *FileSystemService) StreamFromFileSystem(outStream io.Writer, filePath string) error {
-	//existed, err := s.LocalFileSystem.IsExisted(filePath)
-	//if err != nil {
-	//	log.Errorf("Can not check if file exist from file %s with error: %v", filePath, err)
-	//	return err
-	//}
-	//if existed {
+// Use for gin
+func (s *FileSystemService) GetSourceStreamFromLocalFileSystem(filePath string) (io.Reader, error) {
 	srcStream, err := s.LocalFileSystem.GetStreamSourceByFilePath(filePath)
 	if err != nil {
-		log.Errorf("Can not get stream source from local file %s with error: %v", filePath, err)
+		return nil, err
+	}
+	return srcStream, nil
+}
+
+// Use for http basic
+func (s *FileSystemService) StreamFromLocalFileSystem(outStream io.Writer, filePath string) error {
+	srcStream, err := s.GetSourceStreamFromLocalFileSystem(filePath)
+	if err != nil {
 		return err
 	}
 	_, err = io.Copy(outStream, srcStream)
 	if err != nil {
-		log.Errorf("Stream file %s from local file system to client error: %v", filePath, err)
 		return err
 	}
-	//}
 	return nil
 }
 
 func (s *FileSystemService) StreamFromDriveToLocalFileSystem(id string, filePath string) error {
 	newFileStream, err := s.LocalFileSystem.NewFile(filePath)
 	if err != nil {
-		log.Errorf("Can not create new file with filePath: %s, error: %v", filePath, err)
 		return err
 	}
 	srcStreamDrive, err := s.GoogleDriveFileSystem.GetStreamBySourceByID(id)
 	if err != nil {
-		log.Errorf("Can not get srcStream from drive with filepath: %s, id: %s, error: %s", filePath, id, err)
 		return err
 	}
 	_, err = io.Copy(newFileStream, srcStreamDrive)
 	if err != nil {
-		log.Errorf("Can not stream file from drive to local with filepath: %s, id: %s, err: %v", filePath, id, err)
 		return err
 	}
 	return nil
