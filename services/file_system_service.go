@@ -5,12 +5,14 @@ import (
 	"proxy-fileserver/adapter"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/enums"
+	"proxy-fileserver/repository"
 	"strings"
 )
 
 type FileSystemService struct {
 	GoogleDriveFileSystem *adapter.GoogleDriveFileSystem
 	LocalFileSystem       *adapter.LocalFileSystem
+	FileInFor             *repository.FileInfoRepository
 }
 
 func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem) *FileSystemService {

@@ -13,6 +13,8 @@ type Config struct {
 	CacheTimeLocalFileSystem time.Duration
 
 	AuthPublicKey string
+
+	MysqlFileInfoTable string
 }
 
 var Common *Config
@@ -34,5 +36,7 @@ func LoadConfigs() {
 		CacheTimeLocalFileSystem: cacheTimeLocalFileSystem,
 
 		AuthPublicKey: config.GetString("AUTH_PUBLIC_KEY"),
+
+		MysqlFileInfoTable: config.GetString("MYSQL_FILE_INFO_TABLE_NAME"),
 	}
 }
