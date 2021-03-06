@@ -26,10 +26,6 @@ func main() {
 	appContext := bootstrap.InitService(ctx)
 	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider)
 	_ = router.Run(":8080")
-
+	//http.HandleFunc("/", appContext.AppContext.ControllerProvider.GetStreamFileController().GetFileBasicHttp)
+	//_ = http.ListenAndServe(":8080", nil)
 }
-
-//log.Infof("Test me")
-//log.Infof("Testme: %d, %s", 1, "thai123")
-//log.Error("Oh shit, this is a error")
-//log.Errorf("Oh shit, this is a error: %v", errors.New("ANSASASAJIS ERR"))
