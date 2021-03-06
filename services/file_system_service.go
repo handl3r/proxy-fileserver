@@ -21,26 +21,7 @@ func NewLocalStorageService(rootFolder string, googleDrive services.GoogleDriveF
 	}
 }
 
-//func (s *FileSystemService) GetStreamSourceFile(filePath string) (io.Reader, error) {
-//	if !s.validateFilePath(filePath) {
-//		return nil, enums.ErrFileNotExist
-//	}
-//	existed, err := s.LocalFileSystem.IsExisted(filePath)
-//	if err != nil {
-//		log.Errorf("Can not check if file exist on local: [%v]", err)
-//		return nil, err
-//	}
-//	if existed {
-//		streamSource, err := s.LocalFileSystem.GetStreamSourceByFilePath(filePath)
-//		if err != nil {
-//			log.Errorf("Can not getStreamSourceByFilePath [%s], with error: [%v]", filePath, err)
-//			return nil, err
-//		}
-//		return streamSource, nil
-//	}
-//
-//}
-
+// StreamFile Public method control all process to stream file to client and sync file from drive to local server
 func (s *FileSystemService) StreamFile(outStreamHttp io.Writer, filePath string) error {
 	existed, err := s.LocalFileSystem.IsExisted(filePath)
 	if err != nil {
