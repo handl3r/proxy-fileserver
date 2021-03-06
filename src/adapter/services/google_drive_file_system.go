@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type GoogleDriveService struct {
+type GoogleDriveFileSystem struct {
 	service            *drive.Service
 	sharedRootFolder   string
 	sharedRootFolderID string
@@ -20,19 +20,19 @@ type TreeNode struct {
 	ID   string
 }
 
-func NewGoogleDriveClientWithServiceAccount(ctx context.Context, sharedFolder string) (*GoogleDriveService, error) {
+func NewGoogleDriveFileSystem(ctx context.Context, sharedFolder string) (*GoogleDriveFileSystem, error) {
 	service, err := drive.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &GoogleDriveService{
+	return &GoogleDriveFileSystem{
 		service:          service,
 		sharedRootFolder: sharedFolder,
 	}, nil
 }
 
 // path must be: {shared-folder/*}
-func (s *GoogleDriveService) validateFilePath(filePath string) bool {
+func (s *GoogleDriveFileSystem) validateFilePath(filePath string) bool {
 	files := strings.Split(filePath, "/")
 	if len(files) < 2 {
 		return false
@@ -45,7 +45,7 @@ func (s *GoogleDriveService) validateFilePath(filePath string) bool {
 	return true
 }
 
-func (s *GoogleDriveService) buildQuerySearchFile(filePath string) string {
+func (s *GoogleDriveFileSystem) buildQuerySearchFile(filePath string) string {
 	subQueries := make([]string, 0)
 	files := strings.Split(filePath, "/")
 	for _, file := range files[0:(len(files) - 1)] {
@@ -59,7 +59,7 @@ func (s *GoogleDriveService) buildQuerySearchFile(filePath string) string {
 
 // TODO remove search for sharedRootFolder
 // Return fileID, isExisted, error
-func (s *GoogleDriveService) GetFileIDByPath(filePath string) (string, bool, error) {
+func (s *GoogleDriveFileSystem) GetFileIDByPath(filePath string) (string, bool, error) {
 	listFileInPath := strings.Split(filePath, "/")
 	numPathLevel := len(listFileInPath)
 	query := s.buildQuerySearchFile(filePath)
@@ -95,18 +95,20 @@ func (s *GoogleDriveService) GetFileIDByPath(filePath string) (string, bool, err
 	return "", false, nil
 }
 
-func (s *GoogleDriveService) GetStreamSourceByFilePath(filePath string) (io.Reader, error) {
+// Return id, srcStream, error
+func (s *GoogleDriveFileSystem) GetStreamSourceByFilePath(filePath string) (string, io.Reader, error) {
 	id, existed, err := s.GetFileIDByPath(filePath)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	if !existed {
-		return nil, enums.ErrFileNotExist
+		return "", nil, enums.ErrFileNotExist
 	}
-	return s.GetStreamBySourceByID(id)
+	stream, err := s.GetStreamBySourceByID(id)
+	return id, stream, err
 }
 
-func (s *GoogleDriveService) IsExistedByID(id string) (bool, error) {
+func (s *GoogleDriveFileSystem) IsExistedByID(id string) (bool, error) {
 	files, err := s.service.Files.List().Do()
 	if err != nil {
 		return false, err
@@ -123,7 +125,7 @@ func (s *GoogleDriveService) IsExistedByID(id string) (bool, error) {
 	return false, nil
 }
 
-func (s *GoogleDriveService) GetStreamBySourceByID(id string) (io.Reader, error) {
+func (s *GoogleDriveFileSystem) GetStreamBySourceByID(id string) (io.Reader, error) {
 	resp, err := s.service.Files.Get(id).Download()
 	if err != nil {
 		return nil, err
