@@ -7,7 +7,7 @@ import (
 )
 
 func InitDBConnection(user, password, host, port, database string) *sql.DB {
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, database)
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, password, host, port, database)
 	db, err := sql.Open("mysql",
 		dataSourceName)
 	if err != nil {

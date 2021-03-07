@@ -1,20 +1,23 @@
 package api
 
 import (
+	"proxy-fileserver/adapter"
 	"proxy-fileserver/common/lock"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/repository"
 )
 
 type Cleaner struct {
-	FileInfoRepo *repository.FileInfoRepository
-	ExpiredTime  int // hour
+	FileInfoRepo    *repository.FileInfoRepository
+	LocalFileSystem *adapter.LocalFileSystem
+	ExpiredTime     int // hour
 }
 
-func NewCleaner(fileInfoRepo *repository.FileInfoRepository, expiredTime int) *Cleaner {
+func NewCleaner(fileInfoRepo *repository.FileInfoRepository, expiredTime int, localFileSystem *adapter.LocalFileSystem) *Cleaner {
 	return &Cleaner{
-		FileInfoRepo: fileInfoRepo,
-		ExpiredTime:  expiredTime,
+		FileInfoRepo:    fileInfoRepo,
+		LocalFileSystem: localFileSystem,
+		ExpiredTime:     expiredTime,
 	}
 }
 
@@ -31,12 +34,18 @@ func (c *Cleaner) Run() {
 				log.Errorf("[Cleaner]Can not WLOCK for filepath %s with error: %v", fileInfo.FilePath, err)
 				continue
 			}
+			err = c.LocalFileSystem.Delete(fileInfo.FilePath)
+			if err != nil {
+				log.Errorf("[Cleaner]Can not delete file %s at local file system with error: %v", fileInfo.FilePath, err)
+			} else {
+				log.Infof("[Cleaner]Deleted file %s at local file system", fileInfo.FilePath, err)
+			}
 			err = c.FileInfoRepo.Delete(fileInfo.ID)
 			if err != nil {
-				log.Errorf("[Cleaner]Can not remove file id %d, path %s, last_download_at %v with error: %v",
+				log.Errorf("[Cleaner]Can not remove file id %d, path %s, last_download_at %v at database with error: %v",
 					fileInfo.ID, fileInfo.FilePath, fileInfo.LastDownloadAt, err)
 			} else {
-				log.Infof("[Cleaner]remove file id %d, path %s, last_download_at %v", fileInfo.ID, fileInfo.FilePath, fileInfo.LastDownloadAt)
+				log.Infof("[Cleaner]Remove file id %d, path %s, last_download_at %v  at database", fileInfo.ID, fileInfo.FilePath, fileInfo.LastDownloadAt)
 			}
 			err = lock.WUnLockWithKey(fileInfo.FilePath)
 			if err != nil {

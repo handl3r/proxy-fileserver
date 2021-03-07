@@ -33,8 +33,10 @@ func main() {
 	appContext := bootstrap.InitService(ctx, dbConnection)
 
 	c := cron.New()
-	cleaner := api.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem)
-	_ = c.AddFunc("@every 30m", cleaner.Run)
+	cleaner := api.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem,
+		appContext.AppContext.AdapterProvider.GetLocalFileSystem())
+	_ = c.AddFunc("@every 1m", cleaner.Run)
+	c.Start()
 
 	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider)
 	_ = router.Run(":8080")
