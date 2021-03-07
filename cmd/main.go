@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/robfig/cron"
 	"proxy-fileserver/api"
 	"proxy-fileserver/bootstrap"
@@ -36,7 +37,7 @@ func main() {
 	c := cron.New()
 	cleaner := api.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem,
 		appContext.AppContext.AdapterProvider.GetLocalFileSystem())
-	_ = c.AddFunc("@every 1m", cleaner.Run)
+	_ = c.AddFunc(fmt.Sprintf("@every %dm", conf.CycleTimeCleaner), cleaner.Run)
 	c.Start()
 
 	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider)
