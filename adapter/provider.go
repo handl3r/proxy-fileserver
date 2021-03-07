@@ -20,7 +20,7 @@ func NewProviderAdapter(ctx context.Context, config *configs.Config) (ProviderAd
 	if err != nil {
 		return nil, err
 	}
-	localFileSystem := NewLocalFileSystem(config.SharedRootFolderLocal, config.CacheTimeLocalFileSystem)
+	localFileSystem := NewLocalFileSystem(config.SharedRootFolderLocal)
 	return &providerAdapterImpl{
 		googleDriveFileSystem: googleDriveFileSystem,
 		localFileSystem:       localFileSystem,

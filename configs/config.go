@@ -2,7 +2,6 @@ package configs
 
 import (
 	"proxy-fileserver/common/config"
-	"time"
 )
 
 type Config struct {
@@ -10,11 +9,16 @@ type Config struct {
 	SharedRootFolder         string
 	SharedRootFolderID       string
 	SharedRootFolderLocal    string
-	CacheTimeLocalFileSystem time.Duration
+	CacheTimeLocalFileSystem int
 
 	AuthPublicKey string
 
 	MysqlFileInfoTable string
+	MysqlUser          string
+	MysqlPassword      string
+	MysqlPort          string
+	MysqlHost          string
+	MysqlDatabase      string
 }
 
 var Common *Config
@@ -24,19 +28,25 @@ func Get() *Config {
 }
 
 func LoadConfigs() {
-	cacheTimeLocalFileSystem, err := config.GetTimeDuration("CACHE_TIME_LOCAL_FILE_SYSTEM")
-	if err != nil {
-		panic(err)
-	}
+	//cacheTimeLocalFileSystem, err := config.GetTimeDuration("CACHE_TIME_LOCAL_FILE_SYSTEM")
+	//if err != nil {
+	//	panic(err)
+	//}
+
 	Common = &Config{
 		Env:                      config.GetString("PROXY_SERVER_ENV"),
 		SharedRootFolder:         config.GetString("SHARED_ROOT_FOLDER"),
 		SharedRootFolderID:       config.GetString("SHARED_ROOT_FOLDER_ID"),
 		SharedRootFolderLocal:    config.GetString("SHARED_ROOT_FOLDER_LOCAL"),
-		CacheTimeLocalFileSystem: cacheTimeLocalFileSystem,
+		CacheTimeLocalFileSystem: config.GetInt("CACHE_TIME_LOCAL_FILE_SYSTEM"),
 
 		AuthPublicKey: config.GetString("AUTH_PUBLIC_KEY"),
 
 		MysqlFileInfoTable: config.GetString("MYSQL_FILE_INFO_TABLE_NAME"),
+		MysqlUser:          config.GetString("MYSQL_USER"),
+		MysqlPassword:      config.GetString("MYSQL_PASSWORD"),
+		MysqlPort:          config.GetString("MYSQL_PORT"),
+		MysqlHost:          config.GetString("MYSQL_HOST"),
+		MysqlDatabase:      config.GetString("MYSQL_DATABASE"),
 	}
 }

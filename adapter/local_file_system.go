@@ -3,20 +3,28 @@ package adapter
 import (
 	"io"
 	"os"
+	"proxy-fileserver/repository"
 	"strings"
-	"time"
 )
 
 type LocalFileSystem struct {
-	rootFolder string
-	cacheTime  time.Duration
+	rootFolder   string
+	fileInfoRepo *repository.FileInfoRepository
 }
 
-func NewLocalFileSystem(rootFolder string, cacheTime time.Duration) *LocalFileSystem {
+func NewLocalFileSystem(rootFolder string) *LocalFileSystem {
 	return &LocalFileSystem{
-		rootFolder: rootFolder,
-		cacheTime:  cacheTime,
+		rootFolder:   rootFolder,
 	}
+}
+
+// TODO check if should remove parent folders
+func (s *LocalFileSystem) Delete(filePath string) error {
+	err := os.Remove(s.rootFolder + "/" + filePath)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *LocalFileSystem) IsExisted(filePath string) (bool, error) {
@@ -36,18 +44,6 @@ func (s *LocalFileSystem) GetStreamSourceByFilePath(filePath string) (io.Reader,
 		return nil, err
 	}
 	return file, nil
-}
-
-func (s *LocalFileSystem) NewFileAndStream(filePath string, dataSource io.Reader) error {
-	w, err := os.Create(s.rootFolder + "/" + filePath)
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(w, dataSource)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (s *LocalFileSystem) NewFile(filePath string) (io.Writer, error) {

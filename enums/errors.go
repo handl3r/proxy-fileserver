@@ -10,6 +10,11 @@ var (
 	ErrInValidConfigTimeDuration = errors.New("invalid config time duration")
 )
 
+var (
+	ErrMutexNotFound = errors.New("mutex no found")
+	ErrMutexExisted = errors.New("mutex already exist")
+)
+
 // ResponseError
 
 type ErrorResponse struct {

@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"github.com/robfig/cron"
 	"proxy-fileserver/api"
 	"proxy-fileserver/bootstrap"
 	"proxy-fileserver/common/config"
+	"proxy-fileserver/common/lock"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/configs"
 )
@@ -21,9 +23,19 @@ func _initLogger() log.Logging {
 func main() {
 	config.LoadEnvironments()
 	configs.LoadConfigs()
+	conf := configs.Get()
 	_initLogger()
+	lock.InitMapLock()
+
+	dbConnection := bootstrap.InitDBConnection(conf.MysqlUser, conf.MysqlPassword, conf.MysqlHost, conf.MysqlPort, conf.MysqlDatabase)
+
 	ctx := context.Background()
-	appContext := bootstrap.InitService(ctx)
+	appContext := bootstrap.InitService(ctx, dbConnection)
+
+	c := cron.New()
+	cleaner := api.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem)
+	_ = c.AddFunc("@every 30m", cleaner.Run)
+
 	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider)
 	_ = router.Run(":8080")
 	//http.HandleFunc("/", appContext.AppContext.ControllerProvider.GetStreamFileController().GetFileBasicHttp)

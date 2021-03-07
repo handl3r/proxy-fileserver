@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"proxy-fileserver/common/log"
 	"proxy-fileserver/models"
 )
 
@@ -51,4 +52,28 @@ func (r *FileInfoRepository) Delete(id int64) error {
 		return err
 	}
 	return nil
+}
+
+func (r *FileInfoRepository) GetRecordOutDate(hour int) ([]models.FileInfo, error) {
+	query := fmt.Sprintf("SELECT id, filepath, last_download_at FROM %s WHERE las_download_at <= NOW() - INTERVAL %d HOUR", r.tableName, hour)
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	fileInfos := make([]models.FileInfo, 0)
+	for rows.Next() {
+		fileInfo := models.FileInfo{}
+		err := rows.Scan(&fileInfo.ID, &fileInfo.FilePath, &fileInfo.LastDownloadAt)
+		if err != nil {
+			log.Errorf("Failure to get result query from db")
+			continue
+		}
+		fileInfos = append(fileInfos, fileInfo)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return fileInfos, nil
+
 }

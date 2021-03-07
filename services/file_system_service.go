@@ -12,7 +12,8 @@ import (
 type FileSystemService struct {
 	GoogleDriveFileSystem *adapter.GoogleDriveFileSystem
 	LocalFileSystem       *adapter.LocalFileSystem
-	FileInFor             *repository.FileInfoRepository
+
+	FileInFor *repository.FileInfoRepository
 }
 
 func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem) *FileSystemService {
@@ -125,6 +126,7 @@ func (s *FileSystemService) StreamFromLocalFileSystem(outStream io.Writer, fileP
 }
 
 func (s *FileSystemService) StreamFromDriveToLocalFileSystem(id string, filePath string) error {
+
 	newFileStream, err := s.LocalFileSystem.NewFile(filePath)
 	if err != nil {
 		return err
