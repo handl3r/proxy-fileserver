@@ -1,8 +1,7 @@
 package repository
 
 import (
-	"database/sql"
-	"proxy-fileserver/configs"
+	"gorm.io/gorm"
 )
 
 type ProviderRepository interface {
@@ -13,11 +12,9 @@ type providerRepositoryImpl struct {
 	fileInfoRepo *FileInfoRepository
 }
 
-func NewProviderRepository(db *sql.DB, conf *configs.Config) ProviderRepository {
+func NewProviderRepository(db *gorm.DB) ProviderRepository {
 	return &providerRepositoryImpl{
-		fileInfoRepo: NewFileInfoRepository(
-			db, conf.MysqlFileInfoTable,
-		),
+		fileInfoRepo: NewFileInfoRepository(db),
 	}
 }
 

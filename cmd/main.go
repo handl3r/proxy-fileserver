@@ -9,6 +9,7 @@ import (
 	"proxy-fileserver/common/lock"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/configs"
+	"proxy-fileserver/models"
 )
 
 func _initLogger() log.Logging {
@@ -28,7 +29,7 @@ func main() {
 	lock.InitMapLock()
 
 	dbConnection := bootstrap.InitDBConnection(conf.MysqlUser, conf.MysqlPassword, conf.MysqlHost, conf.MysqlPort, conf.MysqlDatabase)
-
+	_ = dbConnection.AutoMigrate(&models.FileInfo{})
 	ctx := context.Background()
 	appContext := bootstrap.InitService(ctx, dbConnection)
 

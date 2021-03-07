@@ -2,7 +2,7 @@ package bootstrap
 
 import (
 	"context"
-	"database/sql"
+	"gorm.io/gorm"
 	"proxy-fileserver/adapter"
 	"proxy-fileserver/api/controllers"
 	"proxy-fileserver/api/middlewares"
@@ -11,13 +11,13 @@ import (
 	"proxy-fileserver/services"
 )
 
-func InitService(ctx context.Context, db *sql.DB) *Context {
+func InitService(ctx context.Context, db *gorm.DB) *Context {
 	conf := configs.Get()
 	adapterProvider, err := adapter.NewProviderAdapter(ctx, conf)
 	if err != nil {
 		panic(err)
 	}
-	repoProvider := repository.NewProviderRepository(db, conf)
+	repoProvider := repository.NewProviderRepository(db)
 	serviceProvider := services.NewServiceProvider(adapterProvider, repoProvider)
 	controllerProvider := controllers.NewControllerProvider(ctx, serviceProvider.GeFileSystemService())
 	middlewareProvider := middlewares.NewMiddlewareProvider(conf.AuthPublicKey)

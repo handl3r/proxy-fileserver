@@ -38,7 +38,7 @@ func (c *Cleaner) Run() {
 			if err != nil {
 				log.Errorf("[Cleaner]Can not delete file %s at local file system with error: %v", fileInfo.FilePath, err)
 			} else {
-				log.Infof("[Cleaner]Deleted file %s at local file system", fileInfo.FilePath, err)
+				log.Infof("[Cleaner]Deleted file %s at local file system", fileInfo.FilePath)
 			}
 			err = c.FileInfoRepo.Delete(fileInfo.ID)
 			if err != nil {
