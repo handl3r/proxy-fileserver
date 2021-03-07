@@ -18,7 +18,7 @@ func InitService(ctx context.Context, db *sql.DB) *Context {
 		panic(err)
 	}
 	repoProvider := repository.NewProviderRepository(db, conf)
-	serviceProvider := services.NewServiceProvider(adapterProvider)
+	serviceProvider := services.NewServiceProvider(adapterProvider, repoProvider)
 	controllerProvider := controllers.NewControllerProvider(ctx, serviceProvider.GeFileSystemService())
 	middlewareProvider := middlewares.NewMiddlewareProvider(conf.AuthPublicKey)
 	context := &Context{

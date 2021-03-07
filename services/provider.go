@@ -2,6 +2,7 @@ package services
 
 import (
 	"proxy-fileserver/adapter"
+	"proxy-fileserver/repository"
 )
 
 type ServiceProvider interface {
@@ -12,11 +13,12 @@ type serviceProviderImpl struct {
 	fileSystemService *FileSystemService
 }
 
-func NewServiceProvider(adapterProvider adapter.ProviderAdapter) ServiceProvider {
+func NewServiceProvider(adapterProvider adapter.ProviderAdapter, repositoryProvider repository.ProviderRepository) ServiceProvider {
 	return &serviceProviderImpl{
 		fileSystemService: NewFileSystemService(
 			adapterProvider.GetGoogleDriveFileSystem(),
 			adapterProvider.GetLocalFileSystem(),
+			repositoryProvider.GetFileInfoRepository(),
 		),
 	}
 }

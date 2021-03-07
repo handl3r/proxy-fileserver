@@ -20,7 +20,7 @@ func NewFileInfoRepository(db *sql.DB, tableName string) *FileInfoRepository {
 }
 
 func (r *FileInfoRepository) Create(model models.FileInfo) error {
-	query := fmt.Sprintf("INSERT INTO %s(filepath, last_download_at) VALUES(?, ?, ?)", r.tableName)
+	query := fmt.Sprintf("INSERT INTO %s (filepath, last_download_at) VALUES(?, ?)", r.tableName)
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err

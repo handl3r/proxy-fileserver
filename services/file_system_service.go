@@ -5,8 +5,10 @@ import (
 	"proxy-fileserver/adapter"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/enums"
+	"proxy-fileserver/models"
 	"proxy-fileserver/repository"
 	"strings"
+	"time"
 )
 
 type FileSystemService struct {
@@ -16,10 +18,11 @@ type FileSystemService struct {
 	FileInFor *repository.FileInfoRepository
 }
 
-func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem) *FileSystemService {
+func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem, fileInFor *repository.FileInfoRepository) *FileSystemService {
 	return &FileSystemService{
 		GoogleDriveFileSystem: googleDrive,
 		LocalFileSystem:       localStorage,
+		FileInFor:             fileInFor,
 	}
 }
 
@@ -41,6 +44,17 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 			log.Errorf("Failure getting source stream file on local file system with filepath: %s, err: %s", filePath, err)
 			return nil, enums.ErrorSystem
 		}
+		go func() {
+			now := time.Now()
+			err := s.FileInFor.Update(models.FileInfo{
+				FilePath:       filePath,
+				LastDownloadAt: now,
+			})
+			if err != nil {
+				log.Errorf("Can not update last_download_at for file %s with error: %v", filePath, err)
+			}
+			log.Infof("Updated last_download_at for file %s, last_download_at: %v", filePath, now)
+		}()
 		return srcStream, nil
 	}
 	if (existed && locked) || (!existed && locked) {
@@ -70,6 +84,18 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 			return
 		}
 		log.Infof("Finished streaming file from drive to local file system with filepath: %s, id: %s", filePath, id)
+	}()
+	go func() {
+		now := time.Now()
+		err := s.FileInFor.Create(models.FileInfo{
+			FilePath:       filePath,
+			LastDownloadAt: now,
+		})
+		if err != nil {
+			log.Errorf("Can not create last_download_at for file %s with error: %v", filePath, err)
+			return
+		}
+		log.Infof("Created last_download_at for file %s, last_download_at: %v", filePath, now)
 	}()
 	return srcStream, nil
 }
