@@ -4,3 +4,4 @@ temp/shared-folder/*
 
 !temp/.keep
 !temp/shared-folder/test-folder/.keep
+!certificates/.keep
