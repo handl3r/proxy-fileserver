@@ -54,8 +54,9 @@ func (r *FileInfoRepository) Delete(id int64) error {
 	return nil
 }
 
-func (r *FileInfoRepository) GetRecordOutDate(hour int) ([]models.FileInfo, error) {
-	query := fmt.Sprintf("SELECT id, filepath, last_download_at FROM %s WHERE last_download_at <= NOW() - INTERVAL %d MINUTE", r.tableName, 1)
+func (r *FileInfoRepository) GetRecordOutDate(minute int) ([]models.FileInfo, error) {
+	query := fmt.Sprintf("SELECT id, filepath, last_download_at FROM %s WHERE last_download_at <= NOW() - INTERVAL %d MINUTE",
+		r.tableName, minute)
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err

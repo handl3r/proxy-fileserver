@@ -10,7 +10,7 @@ import (
 type Cleaner struct {
 	FileInfoRepo    *repository.FileInfoRepository
 	LocalFileSystem *adapter.LocalFileSystem
-	ExpiredTime     int // hour
+	ExpiredTime     int // minute
 }
 
 func NewCleaner(fileInfoRepo *repository.FileInfoRepository, expiredTime int, localFileSystem *adapter.LocalFileSystem) *Cleaner {
