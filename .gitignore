@@ -1,6 +1,7 @@
 certificates/*
 .env
 temp/shared-folder/*
+.idea
 
 !temp/.keep
 !temp/shared-folder/test-folder/.keep
