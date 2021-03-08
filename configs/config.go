@@ -45,7 +45,6 @@ func LoadConfigs() {
 		AuthPublicKeyLocation: config.GetString("AUTH_PUBLIC_KEY"),
 		CycleTimeCleaner:      config.GetInt("CYCLE_TIME_CLEANER"),
 
-		MysqlFileInfoTable: config.GetString("MYSQL_FILE_INFO_TABLE_NAME"),
 		MysqlUser:          config.GetString("MYSQL_USER"),
 		MysqlPassword:      config.GetString("MYSQL_PASSWORD"),
 		MysqlPort:          config.GetString("MYSQL_PORT"),
