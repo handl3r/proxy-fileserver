@@ -14,7 +14,7 @@ Requirement: Git, golang(version > 1.12), windows or linux os, openssl
 openssl genrsa -out private.pem 512
 openssl rsa -in private.pem -outform PEM -pubout -out public.pem
 ```
-You can use 256,1024,... for length of key instead of 512
+You can use 1024,... for length of key instead of 512, but can not small then 512
 Long key make long token
 
 * Output:
@@ -71,6 +71,9 @@ go build -o proxy-fileserver cmd/main.go
     * Put your public key and certificate from (1) on somewhere: example 'certificates/cer.json', '
       certificates/public512.pem'
     * Define your .env file (see .env.example)
+
+Example structure of tree folder tree:
+[example-tree-folder](assets/example-folder-tree.png)
 
 ### 4. Run
 
