@@ -7,22 +7,28 @@ import (
 	"net/http"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/helpers"
-	"strings"
 )
+
+type PayLoad struct {
+	Iat int64 `json:"iat"`
+	Exp int64 `json:"exp"`
+}
 
 type AuthorizationProcessor struct {
 	publicKey         *rsa.PublicKey
 	publicKeyLocation string
+	byteKey           []byte
 }
 
 func NewAuthorizationProcessor(publicKeyLocation string) *AuthorizationProcessor {
-	publicKey, err := helpers.LoadPublicKey(publicKeyLocation)
+	publicKey, byteKey, err := helpers.LoadPublicKey(publicKeyLocation)
 	if err != nil {
 		panic(err)
 	}
 	return &AuthorizationProcessor{
 		publicKey:         publicKey,
 		publicKeyLocation: publicKeyLocation,
+		byteKey:           byteKey,
 	}
 }
 
@@ -33,7 +39,6 @@ func (p *AuthorizationProcessor) ValidateRequest(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	// TODO validate here
 	valid, err := p.validateToken(listToken[0])
 	if err != nil {
 		log.Errorf("Can not validate token with error: %s", err)
@@ -48,12 +53,24 @@ func (p *AuthorizationProcessor) ValidateRequest(c *gin.Context) {
 }
 
 func (p *AuthorizationProcessor) validateToken(token string) (bool, error) {
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		return false, nil
-	}
-	err := jwt.SigningMethodRS256.Verify(strings.Join(parts[0:2], "."), parts[2], p.publicKey)
-	if err != nil {
+	tokenObject, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return p.publicKey, nil
+	})
+	switch err.(type) {
+	case nil:
+		if !tokenObject.Valid {
+			return false, nil
+		}
+		return true, nil
+	case *jwt.ValidationError:
+		vErr := err.(*jwt.ValidationError)
+		switch vErr.Errors {
+		case jwt.ValidationErrorExpired:
+			return false, nil
+		default:
+			log.Errorf("Error when validate token: %v", err)
+		}
+	default:
 		return false, err
 	}
 	return true, nil

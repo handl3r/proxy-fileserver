@@ -9,21 +9,21 @@ import (
 	"os"
 )
 
-func LoadPublicKey(location string) (*rsa.PublicKey, error) {
+func LoadPublicKey(location string) (*rsa.PublicKey, []byte, error) {
 	if _, err := os.Stat(location); err != nil {
 		panic(err)
 	}
 	pub, err := ioutil.ReadFile(location)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	pubPem, _ := pem.Decode(pub)
 	if pubPem == nil {
-		return nil, errors.New("decode public key fail")
+		return nil, nil, errors.New("decode public key fail")
 	}
 	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(pub)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return publicKey, nil
+	return publicKey, pub, nil
 }
