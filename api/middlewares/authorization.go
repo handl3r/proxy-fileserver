@@ -61,10 +61,9 @@ func (p *AuthorizationProcessor) validateToken(token string) (bool, error) {
 		case jwt.ValidationErrorExpired:
 			return false, nil
 		default:
-			log.Errorf("Error when validate token: %v", err)
+			return false, nil
 		}
 	default:
 		return false, err
 	}
-	return true, nil
 }
