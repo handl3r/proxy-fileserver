@@ -9,26 +9,19 @@ import (
 	"proxy-fileserver/helpers"
 )
 
-type PayLoad struct {
-	Iat int64 `json:"iat"`
-	Exp int64 `json:"exp"`
-}
-
 type AuthorizationProcessor struct {
 	publicKey         *rsa.PublicKey
 	publicKeyLocation string
-	byteKey           []byte
 }
 
 func NewAuthorizationProcessor(publicKeyLocation string) *AuthorizationProcessor {
-	publicKey, byteKey, err := helpers.LoadPublicKey(publicKeyLocation)
+	publicKey, err := helpers.LoadPublicKey(publicKeyLocation)
 	if err != nil {
 		panic(err)
 	}
 	return &AuthorizationProcessor{
 		publicKey:         publicKey,
 		publicKeyLocation: publicKeyLocation,
-		byteKey:           byteKey,
 	}
 }
 
