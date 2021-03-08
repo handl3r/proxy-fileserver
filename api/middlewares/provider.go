@@ -8,9 +8,9 @@ type middlewareProviderImpl struct {
 	authorizationProcessor *AuthorizationProcessor
 }
 
-func NewMiddlewareProvider(publicKey string) MiddlewareProvider {
+func NewMiddlewareProvider(publicKeyLocation string) MiddlewareProvider {
 	return middlewareProviderImpl{
-		authorizationProcessor: NewAuthorizationProcessor(publicKey),
+		authorizationProcessor: NewAuthorizationProcessor(publicKeyLocation),
 	}
 }
 

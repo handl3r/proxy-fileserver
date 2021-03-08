@@ -13,7 +13,7 @@ type Config struct {
 
 	CycleTimeCleaner int
 
-	AuthPublicKey string
+	AuthPublicKeyLocation string
 
 	MysqlFileInfoTable string
 	MysqlUser          string
@@ -42,8 +42,8 @@ func LoadConfigs() {
 		SharedRootFolderLocal:    config.GetString("SHARED_ROOT_FOLDER_LOCAL"),
 		CacheTimeLocalFileSystem: config.GetInt("CACHE_TIME_LOCAL_FILE_SYSTEM"),
 
-		AuthPublicKey: config.GetString("AUTH_PUBLIC_KEY"),
-		CycleTimeCleaner: config.GetInt("CYCLE_TIME_CLEANER"),
+		AuthPublicKeyLocation: config.GetString("AUTH_PUBLIC_KEY"),
+		CycleTimeCleaner:      config.GetInt("CYCLE_TIME_CLEANER"),
 
 		MysqlFileInfoTable: config.GetString("MYSQL_FILE_INFO_TABLE_NAME"),
 		MysqlUser:          config.GetString("MYSQL_USER"),
