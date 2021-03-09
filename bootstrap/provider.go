@@ -19,7 +19,7 @@ func InitService(ctx context.Context, db *gorm.DB) *Context {
 	}
 	repoProvider := repository.NewProviderRepository(db)
 	serviceProvider := services.NewServiceProvider(adapterProvider, repoProvider, conf.PrivateKeyLocation, conf.ExpiredTimeToken)
-	controllerProvider := controllers.NewControllerProvider(ctx, serviceProvider.GeFileSystemService())
+	controllerProvider := controllers.NewControllerProvider(ctx, serviceProvider.GeFileSystemService(), serviceProvider.GetAuthService())
 	middlewareProvider := middlewares.NewMiddlewareProvider(conf.AuthPublicKeyLocation)
 	context := &Context{
 		CommonContext: ctx,

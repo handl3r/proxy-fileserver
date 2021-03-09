@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"github.com/dgrijalva/jwt-go"
 	"proxy-fileserver/common/log"
+	"proxy-fileserver/enums"
 	"proxy-fileserver/helpers"
 	"time"
 )
@@ -24,7 +25,7 @@ func NewAuthService(privateKeyLocation string, expiredTime time.Duration) *AuthS
 	}
 }
 
-func (s *AuthService) GenerateToken() (string, error) {
+func (s *AuthService) GenerateToken() (string, enums.Response) {
 	t := jwt.New(jwt.GetSigningMethod("RS256"))
 	claims := jwt.MapClaims{}
 	now := time.Now()
@@ -34,7 +35,7 @@ func (s *AuthService) GenerateToken() (string, error) {
 	token, err := t.SignedString(s.privateKey)
 	if err != nil {
 		log.Errorf("Failure when generate token at: %v", now)
-		return "", err
+		return "", enums.ErrorSystem
 	}
 	return token, nil
 }
