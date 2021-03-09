@@ -27,3 +27,15 @@ func LoadPublicKey(location string) (*rsa.PublicKey, error) {
 	}
 	return publicKey, nil
 }
+
+func LoadPrivateKey(location string) (*rsa.PrivateKey, error) {
+	privateKeyBytes, err := ioutil.ReadFile(location)
+	if err != nil {
+		return nil, err
+	}
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyBytes)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
+}

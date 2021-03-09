@@ -2,6 +2,7 @@ package configs
 
 import (
 	"proxy-fileserver/common/config"
+	"time"
 )
 
 type Config struct {
@@ -14,6 +15,8 @@ type Config struct {
 	CycleTimeCleaner int
 
 	AuthPublicKeyLocation string
+	PrivateKeyLocation    string
+	ExpiredTimeToken      time.Duration
 
 	MysqlFileInfoTable string
 	MysqlUser          string
@@ -34,7 +37,10 @@ func LoadConfigs() {
 	//if err != nil {
 	//	panic(err)
 	//}
-
+	expiredTimeToken, err := config.GetTimeDuration("EXPIRED_TIME_TOKEN")
+	if err != nil {
+		panic(err)
+	}
 	Common = &Config{
 		Env:                      config.GetString("PROXY_SERVER_ENV"),
 		SharedRootFolder:         config.GetString("SHARED_ROOT_FOLDER"),
@@ -43,12 +49,14 @@ func LoadConfigs() {
 		CacheTimeLocalFileSystem: config.GetInt("CACHE_TIME_LOCAL_FILE_SYSTEM"),
 
 		AuthPublicKeyLocation: config.GetString("AUTH_PUBLIC_KEY"),
+		PrivateKeyLocation:    config.GetString("PRIVATE_KEY_LOCATION"),
+		ExpiredTimeToken:      expiredTimeToken,
 		CycleTimeCleaner:      config.GetInt("CYCLE_TIME_CLEANER"),
 
-		MysqlUser:          config.GetString("MYSQL_USER"),
-		MysqlPassword:      config.GetString("MYSQL_PASSWORD"),
-		MysqlPort:          config.GetString("MYSQL_PORT"),
-		MysqlHost:          config.GetString("MYSQL_HOST"),
-		MysqlDatabase:      config.GetString("MYSQL_DATABASE"),
+		MysqlUser:     config.GetString("MYSQL_USER"),
+		MysqlPassword: config.GetString("MYSQL_PASSWORD"),
+		MysqlPort:     config.GetString("MYSQL_PORT"),
+		MysqlHost:     config.GetString("MYSQL_HOST"),
+		MysqlDatabase: config.GetString("MYSQL_DATABASE"),
 	}
 }
