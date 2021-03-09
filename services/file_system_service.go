@@ -57,7 +57,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		}()
 		return srcStream, nil
 	}
-	if (existed && locked) || (!existed && locked) {
+	if locked {
 		id, srcStream, err := s.GoogleDriveFileSystem.GetStreamSourceByFilePath(filePath)
 		if err == enums.ErrFileNotExist {
 			return nil, enums.ErrorNoContent

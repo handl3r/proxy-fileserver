@@ -21,7 +21,7 @@ func NewStreamFileController(service *services.FileSystemService) *StreamFileCon
 
 func (c *StreamFileController) GetFile(ctx *gin.Context) {
 	rawPath := ctx.Request.URL.Path
-	path := rawPath[1:len(rawPath)]
+	path := rawPath[1:]
 	_ = lock.AddLock(path)
 	_ = lock.RLockWithKey(path)
 	defer func() {
@@ -30,7 +30,7 @@ func (c *StreamFileController) GetFile(ctx *gin.Context) {
 	srcStream, err := c.fileSystemService.GetSourceStream(path)
 	if err != nil {
 		if err == enums.ErrorNoContent {
-			ctx.AbortWithStatus(http.StatusNoContent)
+			ctx.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 		ctx.AbortWithStatusJSON(err.GetCode(), err)

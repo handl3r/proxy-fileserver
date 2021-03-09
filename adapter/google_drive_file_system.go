@@ -46,14 +46,13 @@ func (s *GoogleDriveFileSystem) validateFilePath(filePath string) bool {
 	return true
 }
 
-func (s *GoogleDriveFileSystem) buildQuerySearchFile(filePath string) string {
+func (s *GoogleDriveFileSystem) buildQuerySearchFile(filePaths []string) string {
 	subQueries := make([]string, 0)
-	files := strings.Split(filePath, "/")
-	for _, file := range files[0:(len(files) - 1)] {
+	for _, file := range filePaths[0:(len(filePaths) - 1)] {
 		subQuery := fmt.Sprintf("(name = '%s' and mimeType = 'application/vnd.google-apps.folder')", file)
 		subQueries = append(subQueries, subQuery)
 	}
-	lastQuery := fmt.Sprintf("(name = '%s' and mimeType != 'application/vnd.google-apps.folder')", files[len(files)-1])
+	lastQuery := fmt.Sprintf("(name = '%s' and mimeType != 'application/vnd.google-apps.folder')", filePaths[len(filePaths)-1])
 	subQueries = append(subQueries, lastQuery)
 	return strings.Join(subQueries, " or ")
 }
@@ -63,7 +62,7 @@ func (s *GoogleDriveFileSystem) buildQuerySearchFile(filePath string) string {
 func (s *GoogleDriveFileSystem) GetFileIDByPath(filePath string) (string, bool, error) {
 	listFileInPath := strings.Split(filePath, "/")
 	numPathLevel := len(listFileInPath)
-	query := s.buildQuerySearchFile(filePath)
+	query := s.buildQuerySearchFile(listFileInPath)
 	fileList, err := s.service.Files.List().Fields("files(id, name, parents)").Q(query).Do()
 	if err != nil {
 		return "", false, err
