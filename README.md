@@ -1,6 +1,6 @@
 # Proxy file server
 
-Proxy file server integrate with Google Drive for cache file with high frequency download
+Proxy file server integrates with Google Drive for caching file with high frequency download
 
 # Instruction Build and Run
 
