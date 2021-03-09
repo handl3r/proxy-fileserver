@@ -41,7 +41,7 @@ func main() {
 	c.Start()
 
 	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider)
-	_ = router.Run(":8080")
+	_ = router.Run(fmt.Sprintf(":%s", conf.HttpPort))
 	//http.HandleFunc("/", appContext.AppContext.ControllerProvider.GetStreamFileController().GetFileBasicHttp)
 	//_ = http.ListenAndServe(":8080", nil)
 }

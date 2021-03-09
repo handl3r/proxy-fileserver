@@ -24,6 +24,8 @@ type Config struct {
 	MysqlPort          string
 	MysqlHost          string
 	MysqlDatabase      string
+
+	HttpPort string
 }
 
 var Common *Config
@@ -58,5 +60,7 @@ func LoadConfigs() {
 		MysqlPort:     config.GetString("MYSQL_PORT"),
 		MysqlHost:     config.GetString("MYSQL_HOST"),
 		MysqlDatabase: config.GetString("MYSQL_DATABASE"),
+
+		HttpPort: config.GetString("HTTP_PORT"),
 	}
 }
