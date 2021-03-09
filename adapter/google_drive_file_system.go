@@ -47,12 +47,17 @@ func (s *GoogleDriveFileSystem) validateFilePath(filePath string) bool {
 }
 
 func (s *GoogleDriveFileSystem) buildQuerySearchFile(filePaths []string) string {
+	escapedFilePath := make([]string, 0)
+	for _, filePath := range filePaths {
+		sliceFilePath := strings.Split(filePath, "'")
+		escapedFilePath = append(escapedFilePath, strings.Join(sliceFilePath, `\'`))
+	}
 	subQueries := make([]string, 0)
-	for _, file := range filePaths[0:(len(filePaths) - 1)] {
+	for _, file := range escapedFilePath[0:(len(escapedFilePath) - 1)] {
 		subQuery := fmt.Sprintf("(name = '%s' and mimeType = 'application/vnd.google-apps.folder')", file)
 		subQueries = append(subQueries, subQuery)
 	}
-	lastQuery := fmt.Sprintf("(name = '%s' and mimeType != 'application/vnd.google-apps.folder')", filePaths[len(filePaths)-1])
+	lastQuery := fmt.Sprintf("(name = '%s' and mimeType != 'application/vnd.google-apps.folder')", escapedFilePath[len(escapedFilePath)-1])
 	subQueries = append(subQueries, lastQuery)
 	return strings.Join(subQueries, " or ")
 }
