@@ -4,7 +4,7 @@ Proxy file server integrates with Google Drive for caching file with high freque
 
 # Instruction Build and Run
 
-Requirement: Git, golang(version > 1.12), windows or linux os, openssl
+Requirement: Git, golang(version > 1.12), docker, openssl, windows or linux os
 
 ## 1. Generate key pair rsa
 
@@ -91,7 +91,7 @@ On workspace:
 
 * Request example:
   ```text
-  http://localhost:8080/shared-folder/avt.jpg?token=dsahdha.dsad.ewuegud
+  http://localhost:8080/avt.jpg?token=dsahdha.dsad.ewuegud
   ```
 * Response example:
     * 204 for no file exist
@@ -146,7 +146,8 @@ func main() {
 
 #### Error Happen
 
-If any error log with Google Drive, re-share drive folder with service account and wait some minutes
+If any error log with Google Drive, re-share drive folder with service account and wait some minutes or maybe some hours. Google Drive need time to re-index 
+your share-across-domain and longer with old files but immediately on new files
 
 ### API Get Token:
 
