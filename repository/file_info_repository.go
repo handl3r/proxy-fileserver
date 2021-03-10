@@ -25,7 +25,7 @@ func (r *FileInfoRepository) Update(model models.FileInfo) error {
 }
 
 func (r *FileInfoRepository) Delete(filePath string) error {
-	return r.orm.Delete(&models.FileInfo{}, filePath).Error
+	return r.orm.Delete(&models.FileInfo{FilePath: filePath}).Error
 }
 
 func (r *FileInfoRepository) GetRecordOutDate(minute int) ([]models.FileInfo, error) {
