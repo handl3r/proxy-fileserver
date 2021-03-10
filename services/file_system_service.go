@@ -16,24 +16,22 @@ type FileSystemService struct {
 	LocalFileSystem       *adapter.LocalFileSystem
 
 	FileInForRepo *repository.FileInfoRepository
+	sharedFolder  string
 }
 
-func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem, fileInFor *repository.FileInfoRepository) *FileSystemService {
+func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem,
+	fileInFor *repository.FileInfoRepository, sharedFolder string) *FileSystemService {
 	return &FileSystemService{
 		GoogleDriveFileSystem: googleDrive,
 		LocalFileSystem:       localStorage,
 		FileInForRepo:         fileInFor,
+		sharedFolder:          sharedFolder,
 	}
 }
 
 // Use for gin
 func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.Response) {
-	isProcessing, err := s.LocalFileSystem.IsExisted(filePath + enums.SuffixProcessing)
-	if err != nil {
-		log.Errorf("Failure when checking if file exist from local file system %s with error: %v",
-			filePath+enums.SuffixProcessing, err)
-		return nil, enums.ErrorSystem
-	}
+	filePath = s.sharedFolder + "/" + filePath
 	existed, err := s.LocalFileSystem.IsExisted(filePath)
 	if err != nil {
 		log.Errorf("Failure when checking if file exist from local file system %s with error: %v", filePath, err)
@@ -57,6 +55,12 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 			log.Infof("Updated last_download_at for file %s, last_download_at: %v", filePath, now)
 		}()
 		return srcStream, nil
+	}
+	isProcessing, err := s.LocalFileSystem.IsExisted(filePath + enums.SuffixProcessing)
+	if err != nil {
+		log.Errorf("Failure when checking if file exist from local file system %s with error: %v",
+			filePath+enums.SuffixProcessing, err)
+		return nil, enums.ErrorSystem
 	}
 	if isProcessing {
 		id, srcStream, err := s.GoogleDriveFileSystem.GetStreamSourceByFilePath(filePath)
