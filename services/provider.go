@@ -17,13 +17,14 @@ type serviceProviderImpl struct {
 }
 
 func NewServiceProvider(adapterProvider adapter.ProviderAdapter, repositoryProvider repository.ProviderRepository,
-	privateKeyLocation string, expiredTime time.Duration,
+	privateKeyLocation string, expiredTime time.Duration, sharedFolder string,
 ) ServiceProvider {
 	return &serviceProviderImpl{
 		fileSystemService: NewFileSystemService(
 			adapterProvider.GetGoogleDriveFileSystem(),
 			adapterProvider.GetLocalFileSystem(),
 			repositoryProvider.GetFileInfoRepository(),
+			sharedFolder,
 		),
 		authService: NewAuthService(privateKeyLocation, expiredTime),
 	}
