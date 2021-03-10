@@ -15,22 +15,23 @@ type FileSystemService struct {
 	GoogleDriveFileSystem *adapter.GoogleDriveFileSystem
 	LocalFileSystem       *adapter.LocalFileSystem
 
-	FileInFor *repository.FileInfoRepository
+	FileInForRepo *repository.FileInfoRepository
 }
 
 func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStorage *adapter.LocalFileSystem, fileInFor *repository.FileInfoRepository) *FileSystemService {
 	return &FileSystemService{
 		GoogleDriveFileSystem: googleDrive,
 		LocalFileSystem:       localStorage,
-		FileInFor:             fileInFor,
+		FileInForRepo:         fileInFor,
 	}
 }
 
 // Use for gin
 func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.Response) {
-	locked, err := s.LocalFileSystem.IsExisted(filePath + ".lock")
+	isProcessing, err := s.LocalFileSystem.IsExisted(filePath + enums.SuffixProcessing)
 	if err != nil {
-		log.Errorf("Failure when checking if file exist from local file system %s with error: %v", filePath+".lock", err)
+		log.Errorf("Failure when checking if file exist from local file system %s with error: %v",
+			filePath+enums.SuffixProcessing, err)
 		return nil, enums.ErrorSystem
 	}
 	existed, err := s.LocalFileSystem.IsExisted(filePath)
@@ -38,7 +39,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		log.Errorf("Failure when checking if file exist from local file system %s with error: %v", filePath, err)
 		return nil, enums.ErrorSystem
 	}
-	if existed && !locked {
+	if existed {
 		srcStream, err := s.GetSourceStreamFromLocalFileSystem(filePath)
 		if err != nil {
 			log.Errorf("Failure getting source stream file on local file system with filepath: %s, err: %s", filePath, err)
@@ -46,7 +47,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		}
 		go func() {
 			now := time.Now()
-			err := s.FileInFor.Update(models.FileInfo{
+			err := s.FileInForRepo.Update(models.FileInfo{
 				FilePath:       filePath,
 				LastDownloadAt: now,
 			})
@@ -57,7 +58,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		}()
 		return srcStream, nil
 	}
-	if locked {
+	if isProcessing {
 		id, srcStream, err := s.GoogleDriveFileSystem.GetStreamSourceByFilePath(filePath)
 		if err == enums.ErrFileNotExist {
 			return nil, enums.ErrorNoContent
@@ -87,7 +88,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 	}()
 	go func() {
 		now := time.Now()
-		err := s.FileInFor.Create(models.FileInfo{
+		err := s.FileInForRepo.Create(models.FileInfo{
 			FilePath:       filePath,
 			LastDownloadAt: now,
 		})
@@ -167,24 +168,18 @@ func (s *FileSystemService) StreamFromLocalFileSystem(outStream io.Writer, fileP
 }
 
 func (s *FileSystemService) StreamFromDriveToLocalFileSystem(id string, filePath string) error {
-	lockFile := filePath + ".lock"
-	_, err := s.LocalFileSystem.NewFile(lockFile)
+	processingFile := filePath + enums.SuffixProcessing
+	newFileStream, err := s.LocalFileSystem.NewFile(processingFile)
 	if err != nil {
-		log.Errorf("Can not create lock file file for file %s, id %s", filePath, id)
 		return err
 	}
 	defer func() {
-		err := s.LocalFileSystem.Delete(lockFile)
+		err := s.LocalFileSystem.RenameFile(processingFile, filePath)
 		if err != nil {
-			log.Errorf("Can not remove lock file %s with error %s", lockFile, err)
-			return
+			log.Errorf("Failure when rename file %s to %s after stream file to local server with error: %v",
+				processingFile, filePath, err)
 		}
-		log.Infof("Remove lock file %s", lockFile)
 	}()
-	newFileStream, err := s.LocalFileSystem.NewFile(filePath)
-	if err != nil {
-		return err
-	}
 	srcStreamDrive, err := s.GoogleDriveFileSystem.GetStreamBySourceByID(id)
 	if err != nil {
 		return err

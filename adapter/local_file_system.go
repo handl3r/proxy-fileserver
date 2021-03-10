@@ -14,7 +14,7 @@ type LocalFileSystem struct {
 
 func NewLocalFileSystem(rootFolder string) *LocalFileSystem {
 	return &LocalFileSystem{
-		rootFolder:   rootFolder,
+		rootFolder: rootFolder,
 	}
 }
 
@@ -53,7 +53,7 @@ func (s *LocalFileSystem) NewFile(filePath string) (io.Writer, error) {
 	if len(files) > 1 {
 		lastFile = files[len(files)-1]
 		directory = strings.Join(files[0:len(files)-1], "/")
-		err := os.MkdirAll(s.rootFolder+"/"+directory, 0770)
+		err := os.MkdirAll(s.rootFolder+"/"+directory, 0777)
 		if err != nil {
 			return nil, err
 		}
@@ -64,4 +64,8 @@ func (s *LocalFileSystem) NewFile(filePath string) (io.Writer, error) {
 		return nil, err
 	}
 	return w, nil
+}
+
+func (s *LocalFileSystem) RenameFile(oldPath string, newPath string) error {
+	return os.Rename(s.rootFolder+"/"+oldPath, s.rootFolder+"/"+newPath)
 }

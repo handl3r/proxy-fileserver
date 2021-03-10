@@ -40,12 +40,12 @@ func (c *Cleaner) Run() {
 			} else {
 				log.Infof("[Cleaner]Deleted file %s at local file system", fileInfo.FilePath)
 			}
-			err = c.FileInfoRepo.Delete(fileInfo.ID)
+			err = c.FileInfoRepo.Delete(fileInfo.FilePath)
 			if err != nil {
 				log.Errorf("[Cleaner]Can not remove file id %d, path %s, last_download_at %v at database with error: %v",
-					fileInfo.ID, fileInfo.FilePath, fileInfo.LastDownloadAt, err)
+					fileInfo.FilePath, fileInfo.FilePath, fileInfo.LastDownloadAt, err)
 			} else {
-				log.Infof("[Cleaner]Remove file id %d, path %s, last_download_at %v  at database", fileInfo.ID, fileInfo.FilePath, fileInfo.LastDownloadAt)
+				log.Infof("[Cleaner]Remove file id %d, path %s, last_download_at %v  at database", fileInfo.FilePath, fileInfo.FilePath, fileInfo.LastDownloadAt)
 			}
 			err = lock.WUnLockWithKey(fileInfo.FilePath)
 			if err != nil {

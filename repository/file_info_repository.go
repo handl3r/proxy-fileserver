@@ -17,15 +17,15 @@ func NewFileInfoRepository(db *gorm.DB) *FileInfoRepository {
 }
 
 func (r *FileInfoRepository) Create(model models.FileInfo) error {
-	return r.orm.Create(&model).Error
+	return r.orm.Save(&model).Error
 }
 
 func (r *FileInfoRepository) Update(model models.FileInfo) error {
 	return r.orm.Model(&models.FileInfo{}).Where("file_path = ?", model.FilePath).Update("last_download_at", time.Now()).Error
 }
 
-func (r *FileInfoRepository) Delete(id uint) error {
-	return r.orm.Delete(&models.FileInfo{}, id).Error
+func (r *FileInfoRepository) Delete(filePath string) error {
+	return r.orm.Delete(&models.FileInfo{}, filePath).Error
 }
 
 func (r *FileInfoRepository) GetRecordOutDate(minute int) ([]models.FileInfo, error) {
