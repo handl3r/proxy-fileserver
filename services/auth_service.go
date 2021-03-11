@@ -11,16 +11,22 @@ import (
 
 type AuthService struct {
 	privateKey       *rsa.PrivateKey
+	publicKey        *rsa.PublicKey
 	tokenExpiredTime time.Duration
 }
 
-func NewAuthService(privateKeyLocation string, expiredTime time.Duration) *AuthService {
-	key, err := helpers.LoadPrivateKey(privateKeyLocation)
+func NewAuthService(privateKeyLocation, publicKeyLocation string, expiredTime time.Duration) *AuthService {
+	privateKey, err := helpers.LoadPrivateKey(privateKeyLocation)
+	if err != nil {
+		panic(err)
+	}
+	publicKey, err := helpers.LoadPublicKey(publicKeyLocation)
 	if err != nil {
 		panic(err)
 	}
 	return &AuthService{
-		privateKey:       key,
+		privateKey:       privateKey,
+		publicKey:        publicKey,
 		tokenExpiredTime: expiredTime,
 	}
 }
@@ -38,4 +44,27 @@ func (s *AuthService) GenerateToken() (string, enums.Response) {
 		return "", enums.ErrorSystem
 	}
 	return token, nil
+}
+
+func (s *AuthService) ValidateToken(token string) (bool, error) {
+	tokenObject, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return s.publicKey, nil
+	})
+	switch err.(type) {
+	case nil:
+		if !tokenObject.Valid {
+			return false, nil
+		}
+		return true, nil
+	case *jwt.ValidationError:
+		vErr := err.(*jwt.ValidationError)
+		switch vErr.Errors {
+		case jwt.ValidationErrorExpired:
+			return false, nil
+		default:
+			return false, nil
+		}
+	default:
+		return false, err
+	}
 }

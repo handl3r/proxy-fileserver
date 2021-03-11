@@ -144,12 +144,31 @@ func main() {
 
 ```
 
-#### Error Happen
+### API:
 
-If any error log with Google Drive, re-share drive folder with service account and wait some minutes or maybe some hours. Google Drive need time to re-index 
-your share-across-domain and longer with old files but immediately on new files
+#### API Download file:
 
-### API Get Token:
+* Request:
+
+```shell
+curl 'http://localhost:8080/shared-folder/avt.jpg?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTU0NzE2MTYsImlhdCI6MTYxNTQ3MTAxn0.jyX3RIaENdI6JTZdziN3c86cvpqj2M7hpFZTuCATMqtU8uzbs9tLjev21Gng9xwSikb5nY4BcCQRtx9ie29SwQ' \
+  -H 'Upgrade-Insecure-Requests: 1' \
+  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36' \
+  --compressed
+```
+
+* Response:
+    * Get file successfully:
+        * HTTP Code: 200
+    * Invalid token:
+        * HTTP Code: 401
+    * File not found:
+        * HTTP Code: 404
+    * System Error:
+        * HTTP Code: 500
+        * Body: "System error. Please contact admin!"
+
+#### API get token:
 
 * Request:
   ```shell
@@ -162,3 +181,31 @@ your share-across-domain and longer with old files but immediately on new files
   "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTUyNzE4MDMsImlhdCI6MTYxNTI3MTc0M30.ERHFO74v31F6n1psU94qT5mL4G7WMUbiOYnZsdGeIqmpSuJ1DhZvmRSORkZsYFRJcmCbjMJgr6Ukq0-pBHES3g"
 }
 ```
+
+#### API verify token:
+
+* Request:
+
+```shell
+curl --location --request POST 'localhost:8080/verify' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTU0NzE2MTYsImlhdCI6MTYxNTQ3MTAxNn0.jyX3RIaENdI6JTZdziN3c86cvpqj2M7hpFZTuCATMqtU8uzbs9tLjev21Gng9xwSikb5nY4BcCQRtx9ie29SwQ"
+}'
+```
+
+* Response:
+    * Valid:
+        * HTTP Code: 200
+        * Body: null
+    * Invalid:
+        * HTTP Code: 401
+        * Body: null
+
+### FAQ
+
+* If any error log with Google Drive, re-share drive folder with service account and wait some minutes or maybe some
+  hours. Google Drive need time to re-index your share-across-domain and longer with old files but immediately on new
+  files.
+
+* Delete all records in database and all file in shared-folder before re-run
