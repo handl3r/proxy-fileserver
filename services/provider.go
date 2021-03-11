@@ -17,7 +17,7 @@ type serviceProviderImpl struct {
 }
 
 func NewServiceProvider(adapterProvider adapter.ProviderAdapter, repositoryProvider repository.ProviderRepository,
-	privateKeyLocation string, expiredTime time.Duration, sharedFolder string,
+	privateKeyLocation, publicKeyLocation string, expiredTime time.Duration, sharedFolder string,
 ) ServiceProvider {
 	return &serviceProviderImpl{
 		fileSystemService: NewFileSystemService(
@@ -26,7 +26,7 @@ func NewServiceProvider(adapterProvider adapter.ProviderAdapter, repositoryProvi
 			repositoryProvider.GetFileInfoRepository(),
 			sharedFolder,
 		),
-		authService: NewAuthService(privateKeyLocation, expiredTime),
+		authService: NewAuthService(privateKeyLocation, publicKeyLocation, expiredTime),
 	}
 }
 

@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"proxy-fileserver/api/dtos"
 	"proxy-fileserver/services"
 )
 
@@ -27,4 +28,27 @@ func (c *AuthController) GetToken(ctx *gin.Context) {
 	}{
 		Token: token,
 	})
+}
+
+func (c *AuthController) ValidateToken(ctx *gin.Context) {
+	var token *dtos.Token
+	err := ctx.ShouldBindJSON(&token)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	valid, err := c.AuthService.ValidateToken(token.Token)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, struct {
+			Message string
+		}{
+			Message: "System error. Please contact admin!",
+		})
+		return
+	}
+	if valid {
+		ctx.JSON(http.StatusOK, nil)
+	} else {
+		ctx.JSON(http.StatusUnauthorized, nil)
+	}
 }
