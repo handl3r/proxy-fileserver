@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"proxy-fileserver/enums"
 	"strconv"
@@ -63,4 +64,18 @@ func GetTimeDuration(key string) (time.Duration, error) {
 		return 0, err
 	}
 	return timeDuration, nil
+}
+
+func GetBoolWithD(key string, defaultValue bool) (bool, error) {
+	rawValue := os.Getenv(key)
+	if len(rawValue) == 0 {
+		return defaultValue, nil
+	}
+	if rawValue != "ON" && rawValue != "OFF" {
+		return false, errors.New("invalid value for bool")
+	}
+	if rawValue == "ON" {
+		return true, nil
+	}
+	return false, nil
 }

@@ -6,12 +6,14 @@ import (
 	"proxy-fileserver/api/middlewares"
 )
 
-func NewRouterWithMiddleware(controllerProvider controllers.ControllerProvider, middlewareProvider middlewares.MiddlewareProvider) *gin.Engine {
+func NewRouterWithMiddleware(controllerProvider controllers.ControllerProvider, middlewareProvider middlewares.MiddlewareProvider,
+	requiredToken bool) *gin.Engine {
 	router := gin.Default()
 	router.RouterGroup.POST("/auth", controllerProvider.GetAuthController().GetToken)
 	router.RouterGroup.POST("/verify", controllerProvider.GetAuthController().ValidateToken)
 	router.NoRoute(controllerProvider.GetStreamFileController().GetFile)
-	// Disable middleware for nginx can call free
-	//router.Use(middlewareProvider.GetAuthorizationProcessor().ValidateRequest)
+	if requiredToken {
+		router.Use(middlewareProvider.GetAuthorizationProcessor().ValidateRequest)
+	}
 	return router
 }

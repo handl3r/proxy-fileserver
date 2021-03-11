@@ -52,6 +52,8 @@ go build -o proxy-fileserver cmd/main.go
     * MYSQL_PORT=3306 port database mysql
     * MYSQL_HOST= host database
     * MYSQL_DATABASE= name database
+    * HTTP_PORT=8080 port http
+    * REQUIRED_TOKEN=ON (ON/OFF) default is ON, if OFF, you do not need token to access resources
     * GOOGLE_APPLICATION_CREDENTIALS= path to credential file (json) of service account cloud google
 
 - .env and binary file must be in the same folder

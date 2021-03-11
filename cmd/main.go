@@ -40,7 +40,7 @@ func main() {
 	_ = c.AddFunc(fmt.Sprintf("@every %dm", conf.CycleTimeCleaner), cleaner.Run)
 	c.Start()
 
-	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider)
+	router := api.NewRouterWithMiddleware(appContext.AppContext.ControllerProvider, appContext.AppContext.MiddlewareProvider, conf.RequiredToken)
 	_ = router.Run(fmt.Sprintf(":%s", conf.HttpPort))
 	//http.HandleFunc("/", appContext.AppContext.ControllerProvider.GetStreamFileController().GetFileBasicHttp)
 	//_ = http.ListenAndServe(":8080", nil)

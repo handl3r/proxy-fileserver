@@ -25,7 +25,8 @@ type Config struct {
 	MysqlHost          string
 	MysqlDatabase      string
 
-	HttpPort string
+	HttpPort      string
+	RequiredToken bool
 }
 
 var Common *Config
@@ -39,6 +40,10 @@ func LoadConfigs() {
 	//if err != nil {
 	//	panic(err)
 	//}
+	requiredToken, err := config.GetBoolWithD("REQUIRED_TOKEN", true)
+	if err != nil {
+		panic(err)
+	}
 	expiredTimeToken, err := config.GetTimeDuration("EXPIRED_TIME_TOKEN")
 	if err != nil {
 		panic(err)
@@ -61,6 +66,7 @@ func LoadConfigs() {
 		MysqlHost:     config.GetString("MYSQL_HOST"),
 		MysqlDatabase: config.GetString("MYSQL_DATABASE"),
 
-		HttpPort: config.GetString("HTTP_PORT"),
+		HttpPort:      config.GetString("HTTP_PORT"),
+		RequiredToken: requiredToken,
 	}
 }
