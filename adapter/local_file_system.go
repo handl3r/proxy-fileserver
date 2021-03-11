@@ -53,7 +53,7 @@ func (s *LocalFileSystem) NewFile(filePath string) (io.Writer, error) {
 	if len(files) > 1 {
 		lastFile = files[len(files)-1]
 		directory = strings.Join(files[0:len(files)-1], "/")
-		err := os.MkdirAll(s.rootFolder+"/"+directory, 0777)
+		err := os.MkdirAll(s.rootFolder+"/"+directory, 0775)
 		if err != nil {
 			return nil, err
 		}
