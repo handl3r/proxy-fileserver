@@ -11,6 +11,7 @@ func NewRouterWithMiddleware(controllerProvider controllers.ControllerProvider, 
 	router.RouterGroup.POST("/auth", controllerProvider.GetAuthController().GetToken)
 	router.RouterGroup.POST("/verify", controllerProvider.GetAuthController().ValidateToken)
 	router.NoRoute(controllerProvider.GetStreamFileController().GetFile)
-	router.Use(middlewareProvider.GetAuthorizationProcessor().ValidateRequest)
+	// Disable middleware for nginx can call free
+	//router.Use(middlewareProvider.GetAuthorizationProcessor().ValidateRequest)
 	return router
 }
