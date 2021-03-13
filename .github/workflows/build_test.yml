@@ -21,8 +21,10 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
+      - name: Check workspace
+        run: pwd
       - name: Test
-        run: go test -v ${{ GITHUB.WORKSPACE }}/test
+        run: go test -v ./...
       - name: Vet
         run: go vet ./...
 
