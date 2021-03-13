@@ -1,13 +1,13 @@
 name: Buid And Test
 on:
   push:
-    branches:
-      - '!develop'
-      - '!main'
+    branches-ignore:
+      - develop
+      - main
   pull_request:
-    branches:
-      - '!develop'
-      - '!main'
+    branches-ignore:
+      - develop
+      - main
 
 jobs:
   build-and-test:
