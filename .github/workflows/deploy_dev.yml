@@ -1,0 +1,44 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: Build
+        run: go build -o proxyserver ./cmd/main.go
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test
+        run: go test ./test
+      - name: Vet
+        run: go vet ./...
+
+  deploy:
+    needs:
+      - build
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout/@v2
+
+      - name: SSH to server
+        run: echo "SSH to dev here ...."
+      - name: SCP
+        run: echo "SCP here ..."

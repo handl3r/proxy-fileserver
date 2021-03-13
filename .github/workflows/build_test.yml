@@ -1,0 +1,28 @@
+name: Buid And Test
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: Build
+        run: go build -o proxyserver ./cmd/main.go
+  test:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        run: go test -v ./test
+      - name: Vet
+        run: go vet ./...
+
