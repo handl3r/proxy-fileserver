@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test
-        run: go test -v ./test
+        run: go test -v ${{ GITHUB.WORKSPACE }}/test
       - name: Vet
         run: go vet ./...
 
