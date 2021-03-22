@@ -10,6 +10,7 @@ import (
 	"proxy-fileserver/common/lock"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/configs"
+	"proxy-fileserver/jobs"
 	"proxy-fileserver/models"
 )
 
@@ -34,8 +35,10 @@ func main() {
 	ctx := context.Background()
 	appContext := bootstrap.InitService(ctx, dbConnection)
 
+	jobs.LoadLockFromDB(appContext.AppContext.RepoProvider.GetFileInfoRepository())
+
 	c := cron.New()
-	cleaner := api.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem,
+	cleaner := jobs.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem,
 		configs.Get().SharedRootFolder, appContext.AppContext.AdapterProvider.GetLocalFileSystem())
 	_ = c.AddFunc(fmt.Sprintf("@every %dm", conf.CycleTimeCleaner), cleaner.Run)
 	c.Start()
