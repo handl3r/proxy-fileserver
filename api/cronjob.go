@@ -10,13 +10,15 @@ import (
 type Cleaner struct {
 	FileInfoRepo    *repository.FileInfoRepository
 	LocalFileSystem *adapter.LocalFileSystem
+	SharedFolder    string
 	ExpiredTime     int // minute
 }
 
-func NewCleaner(fileInfoRepo *repository.FileInfoRepository, expiredTime int, localFileSystem *adapter.LocalFileSystem) *Cleaner {
+func NewCleaner(fileInfoRepo *repository.FileInfoRepository, expiredTime int, sharedFolder string, localFileSystem *adapter.LocalFileSystem) *Cleaner {
 	return &Cleaner{
 		FileInfoRepo:    fileInfoRepo,
 		LocalFileSystem: localFileSystem,
+		SharedFolder:    sharedFolder,
 		ExpiredTime:     expiredTime,
 	}
 }
@@ -34,7 +36,7 @@ func (c *Cleaner) Run() {
 				log.Errorf("[Cleaner]Can not WLOCK for filepath %s with error: %v", fileInfo.FilePath, err)
 				continue
 			}
-			err = c.LocalFileSystem.Delete(fileInfo.FilePath)
+			err = c.LocalFileSystem.Delete(c.SharedFolder + "/" + fileInfo.FilePath)
 			if err != nil {
 				log.Errorf("[Cleaner]Can not delete file %s at local file system with error: %v", fileInfo.FilePath, err)
 			} else {
