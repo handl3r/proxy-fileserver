@@ -27,6 +27,14 @@ type Config struct {
 
 	HttpPort      string
 	RequiredToken bool
+
+	GoogleDriveOAuthConfig GoogleDriveOAuth2Config
+}
+
+type GoogleDriveOAuth2Config struct {
+	CredentialFile string
+	TokenFile      string
+	Enable         bool
 }
 
 var Common *Config
@@ -48,6 +56,15 @@ func LoadConfigs() {
 	if err != nil {
 		panic(err)
 	}
+	gOAuth2Enable, err := config.GetBoolWithD("GOOGLE_OAUTH2_ENABLE", true)
+	if err != nil {
+		panic(err)
+	}
+	gOAuth2Config := GoogleDriveOAuth2Config{
+		CredentialFile: config.GetString("CREDENTIAL_GOOGLE_OAUTH2_FILE"),
+		TokenFile:      config.GetString("TOKEN_GOOGLE_OAUTH2_FILE"),
+		Enable:         gOAuth2Enable,
+	}
 	Common = &Config{
 		Env:                      config.GetString("PROXY_SERVER_ENV"),
 		SharedRootFolder:         config.GetString("SHARED_ROOT_FOLDER"),
@@ -68,5 +85,7 @@ func LoadConfigs() {
 
 		HttpPort:      config.GetString("HTTP_PORT"),
 		RequiredToken: requiredToken,
+
+		GoogleDriveOAuthConfig: gOAuth2Config,
 	}
 }

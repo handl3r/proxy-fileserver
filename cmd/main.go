@@ -36,7 +36,7 @@ func main() {
 
 	c := cron.New()
 	cleaner := api.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem,
-		appContext.AppContext.AdapterProvider.GetLocalFileSystem())
+		configs.Get().SharedRootFolder, appContext.AppContext.AdapterProvider.GetLocalFileSystem())
 	_ = c.AddFunc(fmt.Sprintf("@every %dm", conf.CycleTimeCleaner), cleaner.Run)
 	c.Start()
 

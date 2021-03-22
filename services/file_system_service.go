@@ -31,6 +31,7 @@ func NewFileSystemService(googleDrive *adapter.GoogleDriveFileSystem, localStora
 
 // Use for gin
 func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.Response) {
+	rawFilePath := filePath
 	filePath = s.sharedFolder + "/" + filePath
 	existed, err := s.LocalFileSystem.IsExisted(filePath)
 	if err != nil {
@@ -46,7 +47,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		go func() {
 			now := time.Now()
 			err := s.FileInForRepo.Update(models.FileInfo{
-				FilePath:       filePath,
+				FilePath:       rawFilePath,
 				LastDownloadAt: now,
 			})
 			if err != nil {
@@ -93,7 +94,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 	go func() {
 		now := time.Now()
 		err := s.FileInForRepo.Create(models.FileInfo{
-			FilePath:       filePath,
+			FilePath:       rawFilePath,
 			LastDownloadAt: now,
 		})
 		if err != nil {
