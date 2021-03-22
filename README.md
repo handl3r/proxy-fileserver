@@ -55,18 +55,22 @@ go build -o proxy-fileserver cmd/main.go
     * HTTP_PORT=8080 port http
     * REQUIRED_TOKEN=ON (ON/OFF) default is ON, if OFF, you do not need token to access resources
     * GOOGLE_APPLICATION_CREDENTIALS= path to credential file (json) of service account cloud google
+    * CREDENTIAL_GOOGLE_OAUTH2_FILE=certificates/credentials.json google oauth drive credential
+    * TOKEN_GOOGLE_OAUTH2_FILE=certificates/token.json path to save token
+    * GOOGLE_OAUTH2_ENABLE=ON default is ON // if set to OFF, use must config service account
+    * INTERACTIVE_MODE=OFF default is off. Set to ON when use want to interact with terminal to exchange google access token
 
 - .env and binary file must be in the same folder
 
 ## 3. Setup
 
 * On Cloud Google:
-    * Create service account and get certificate in json file (1)
+    * Create service account or create OAuth client ID if you want to use GOOGLE_OAUTH2_ENABLE and get certificate in json file (1)
     * Enable Drive api
 
 * On Google Drive:
     * Files storage in 'shared-folder'
-    * Share your 'shared-folder' with service account of google cloud
+    * Share your 'shared-folder' with service account of google cloud if you use service account
     * Get ID of 'shared-folder' on url
 
 * On server:
@@ -75,6 +79,8 @@ go build -o proxy-fileserver cmd/main.go
     * Put your public key and certificate from (1) on somewhere: example 'certificates/cer.json', '
       certificates/public512.pem'
     * Define your .env file (see .env.example)
+  
+* Use exg tool if you set INTERACTIVE_MODE=OFF to pre-generate token. [exg-tool](additional-tools/google_token_exchange)
 
 Example structure of tree folder tree:
 [example-tree-folder](assets/example-folder-tree.png)
@@ -211,3 +217,10 @@ curl --location --request POST 'localhost:8080/verify' \
   files.
 
 * Delete all records in database and all file in shared-folder before re-run
+
+* More information to config cloud google:
+  * https://developers.google.com/drive/api/v3/quickstart/go
+  
+* Confuse about INTERACTIVE_MODE:
+  * When interactive mode set to OFF, you must had access token and refresh token storage in TOKEN_GOOGLE_OAUTH2_FILE
+  * Encourage to use google_token_exchange tool to pre-generate token, then use INTERACTIVE_MODE=OFF in proxy server

@@ -3,13 +3,11 @@ package adapter
 import (
 	"io"
 	"os"
-	"proxy-fileserver/repository"
 	"strings"
 )
 
 type LocalFileSystem struct {
 	rootFolder   string
-	fileInfoRepo *repository.FileInfoRepository
 }
 
 func NewLocalFileSystem(rootFolder string) *LocalFileSystem {
