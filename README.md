@@ -58,6 +58,7 @@ go build -o proxy-fileserver cmd/main.go
     * CREDENTIAL_GOOGLE_OAUTH2_FILE=certificates/credentials.json google oauth drive credential
     * TOKEN_GOOGLE_OAUTH2_FILE=certificates/token.json path to save token
     * GOOGLE_OAUTH2_ENABLE=ON default is ON // if set to OFF, use must config service account
+    * INTERACTIVE_MODE=OFF default is off. Set to ON when use want to interact with terminal to exchange google access token
 
 - .env and binary file must be in the same folder
 
@@ -78,6 +79,8 @@ go build -o proxy-fileserver cmd/main.go
     * Put your public key and certificate from (1) on somewhere: example 'certificates/cer.json', '
       certificates/public512.pem'
     * Define your .env file (see .env.example)
+  
+* Use exg tool if you set INTERACTIVE_MODE=OFF to pre-generate token. [exg-tool](additional-tools/google_token_exchange)
 
 Example structure of tree folder tree:
 [example-tree-folder](assets/example-folder-tree.png)
@@ -217,3 +220,7 @@ curl --location --request POST 'localhost:8080/verify' \
 
 * More information to config cloud google:
   * https://developers.google.com/drive/api/v3/quickstart/go
+  
+* Confuse about INTERACTIVE_MODE:
+  * When interactive mode set to OFF, you must had access token and refresh token storage in TOKEN_GOOGLE_OAUTH2_FILE
+  * Encourage to use google_token_exchange tool to pre-generate token, then use INTERACTIVE_MODE=OFF in proxy server

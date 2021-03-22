@@ -28,6 +28,7 @@ type Config struct {
 	HttpPort      string
 	RequiredToken bool
 
+	InteractiveMode        bool
 	GoogleDriveOAuthConfig GoogleDriveOAuth2Config
 }
 
@@ -65,6 +66,10 @@ func LoadConfigs() {
 		TokenFile:      config.GetString("TOKEN_GOOGLE_OAUTH2_FILE"),
 		Enable:         gOAuth2Enable,
 	}
+	interactiveMode, err := config.GetBoolWithD("INTERACTIVE_MODE", false)
+	if err != nil {
+		panic(nil)
+	}
 	Common = &Config{
 		Env:                      config.GetString("PROXY_SERVER_ENV"),
 		SharedRootFolder:         config.GetString("SHARED_ROOT_FOLDER"),
@@ -86,6 +91,7 @@ func LoadConfigs() {
 		HttpPort:      config.GetString("HTTP_PORT"),
 		RequiredToken: requiredToken,
 
+		InteractiveMode:        interactiveMode,
 		GoogleDriveOAuthConfig: gOAuth2Config,
 	}
 }

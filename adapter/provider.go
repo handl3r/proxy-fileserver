@@ -9,6 +9,7 @@ import (
 	"google.golang.org/api/drive/v3"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"proxy-fileserver/common/log"
 	"proxy-fileserver/configs"
@@ -37,7 +38,7 @@ func NewProviderAdapter(ctx context.Context, config *configs.Config) (ProviderAd
 		if err != nil {
 			return nil, err
 		}
-		client := getDriveClient(gConfig, config.GoogleDriveOAuthConfig.TokenFile)
+		client := GetDriveClient(gConfig, config.GoogleDriveOAuthConfig.TokenFile, config.InteractiveMode)
 		service, err = drive.New(client)
 		if err != nil {
 			log.Errorf("Can not init service google drive with client, error: %v", err)
@@ -66,12 +67,18 @@ func (p *providerAdapterImpl) GetLocalFileSystem() *LocalFileSystem {
 	return p.localFileSystem
 }
 
-func getDriveClient(config *oauth2.Config, tokenLocation string) *http.Client {
+func GetDriveClient(config *oauth2.Config, tokenLocation string, interactiveMode bool) *http.Client {
 	var token *oauth2.Token
 	var err error
 	token, err = getTokenFromFile(tokenLocation)
 	if err != nil {
-		log.Errorf("Can not get G Oauth2 Token from file: %s, error: %v", tokenLocation, err)
+		if !os.IsNotExist(err) {
+			log.Errorf("Can not get G Oauth2 Token from file: %s, error: %v", tokenLocation, err)
+		}
+		if !interactiveMode {
+			log.Infof("ENABLE interactive mode for exchange access token or use my google_token_exchange in additional-tools")
+			panic(err)
+		}
 		token, err = getTokenFromCallback(config)
 		if err != nil {
 			log.Errorf("Can not get G OAuth2 Token from Callback with error: %v", err)
@@ -101,8 +108,13 @@ func getTokenFromCallback(config *oauth2.Config) (*oauth2.Token, error) {
 	log.Infof("Get G OAuth2 Token from callback")
 	authURL := config.AuthCodeURL(enums.StateToken, oauth2.AccessTypeOffline)
 	log.Infof("Access following link[%s], grant permission then type authorization here: ", authURL)
-	var authCode string
-	if _, err := fmt.Scan(&authCode); err != nil {
+	var authCodeURL string
+	if _, err := fmt.Scan(&authCodeURL); err != nil {
+		return nil, err
+	}
+	authCode, err := url.QueryUnescape(authCodeURL)
+	if err != nil {
+		log.Errorf("Can not decode auth code url: %s with error: %v", authCodeURL, err)
 		return nil, err
 	}
 	tok, err := config.Exchange(context.TODO(), authCode)
