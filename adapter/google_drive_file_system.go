@@ -20,16 +20,12 @@ type TreeNode struct {
 	ID   string
 }
 
-func NewGoogleDriveFileSystem(ctx context.Context, sharedRootFolder, sharedRootFolderID string) (*GoogleDriveFileSystem, error) {
-	service, err := drive.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
+func NewGoogleDriveFileSystem(ctx context.Context, service *drive.Service, sharedRootFolder, sharedRootFolderID string) *GoogleDriveFileSystem {
 	return &GoogleDriveFileSystem{
 		service:            service,
 		sharedRootFolder:   sharedRootFolder,
 		sharedRootFolderID: sharedRootFolderID,
-	}, nil
+	}
 }
 
 // path must be: {shared-folder/*}

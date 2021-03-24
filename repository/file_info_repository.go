@@ -16,6 +16,12 @@ func NewFileInfoRepository(db *gorm.DB) *FileInfoRepository {
 	}
 }
 
+func (r *FileInfoRepository) GetAll() ([]models.FileInfo, error) {
+	fileInfos := make([]models.FileInfo, 0)
+	err := r.orm.Find(&fileInfos).Error
+	return fileInfos, err
+}
+
 func (r *FileInfoRepository) Create(model models.FileInfo) error {
 	return r.orm.Save(&model).Error
 }
