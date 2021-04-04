@@ -87,11 +87,16 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		err = s.StreamFromDriveToLocalFileSystem(id, filePath)
 		if err != nil {
 			log.Errorf("Failure when streaming file from drive to local file system with filepath: %s, id: %s, err: %v", filePath, id, err)
+			log.Infof("Start cleaning processing file")
+			err = s.DeleteProcessingFile(filePath)
+			if err == nil {
+				log.Infof("Finish cleaning processing file for file path %s with no error", filePath)
+			} else {
+				log.Infof("Finish cleaning processing file for file path %s with error: %v", filePath, err)
+			}
 			return
 		}
 		log.Infof("Finished streaming file from drive to local file system with filepath: %s, id: %s", filePath, id)
-	}()
-	go func() {
 		now := time.Now()
 		err := s.FileInForRepo.Create(models.FileInfo{
 			FilePath:       rawFilePath,
@@ -103,6 +108,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		}
 		log.Infof("Created last_download_at for file %s, last_download_at: %v", filePath, now)
 	}()
+
 	return srcStream, nil
 }
 
@@ -178,19 +184,18 @@ func (s *FileSystemService) StreamFromDriveToLocalFileSystem(id string, filePath
 	if err != nil {
 		return err
 	}
-	defer func() {
-		err := s.LocalFileSystem.RenameFile(processingFile, filePath)
-		if err != nil {
-			log.Errorf("Failure when rename file %s to %s after stream file to local server with error: %v",
-				processingFile, filePath, err)
-		}
-	}()
 	srcStreamDrive, err := s.GoogleDriveFileSystem.GetStreamBySourceByID(id)
 	if err != nil {
 		return err
 	}
 	_, err = io.Copy(newFileStream, srcStreamDrive)
 	if err != nil {
+		return err
+	}
+	err = s.LocalFileSystem.RenameFile(processingFile, filePath)
+	if err != nil {
+		log.Errorf("Failure when rename file %s to %s after stream file to local server with error: %v",
+			processingFile, filePath, err)
 		return err
 	}
 	return nil
@@ -208,4 +213,14 @@ func (s *FileSystemService) validateFilePath(filePath string) bool {
 		}
 	}
 	return true
+}
+
+func (s *FileSystemService) DeleteProcessingFile(rawFilePath string) error {
+	processingFile := rawFilePath + enums.SuffixProcessing
+	err := s.LocalFileSystem.Delete(processingFile)
+	if err != nil {
+		log.Errorf("Can not delete processing file: %s with error: %v", processingFile, err)
+		return err
+	}
+	return nil
 }
