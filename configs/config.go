@@ -25,8 +25,9 @@ type Config struct {
 	MysqlHost          string
 	MysqlDatabase      string
 
-	HttpPort      string
-	RequiredToken bool
+	HttpPort        string
+	RequiredToken   bool
+	StrictTokenMode bool
 
 	InteractiveMode        bool
 	GoogleDriveOAuthConfig GoogleDriveOAuth2Config
@@ -45,11 +46,11 @@ func Get() *Config {
 }
 
 func LoadConfigs() {
-	//cacheTimeLocalFileSystem, err := config.GetTimeDuration("CACHE_TIME_LOCAL_FILE_SYSTEM")
-	//if err != nil {
-	//	panic(err)
-	//}
 	requiredToken, err := config.GetBoolWithD("REQUIRED_TOKEN", true)
+	if err != nil {
+		panic(err)
+	}
+	strictToken, err := config.GetBoolWithD("STRICT_TOKEN_MODE", false)
 	if err != nil {
 		panic(err)
 	}
@@ -88,8 +89,9 @@ func LoadConfigs() {
 		MysqlHost:     config.GetString("MYSQL_HOST"),
 		MysqlDatabase: config.GetString("MYSQL_DATABASE"),
 
-		HttpPort:      config.GetString("HTTP_PORT"),
-		RequiredToken: requiredToken,
+		HttpPort:        config.GetString("HTTP_PORT"),
+		RequiredToken:   requiredToken,
+		StrictTokenMode: strictToken,
 
 		InteractiveMode:        interactiveMode,
 		GoogleDriveOAuthConfig: gOAuth2Config,

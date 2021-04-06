@@ -8,16 +8,42 @@ import (
 )
 
 type AuthController struct {
-	AuthService *services.AuthService
+	AuthService     *services.AuthService
+	StrictTokenMode bool
 }
 
-func NewAuthController(authService *services.AuthService) *AuthController {
+func NewAuthController(authService *services.AuthService, strictTokenMode bool) *AuthController {
 	return &AuthController{
-		AuthService: authService,
+		AuthService:     authService,
+		StrictTokenMode: strictTokenMode,
 	}
 }
 
 func (c *AuthController) GetToken(ctx *gin.Context) {
+	if c.StrictTokenMode {
+		var createTokenRequest *dtos.CreateTokenRequest
+		err := ctx.ShouldBindJSON(&createTokenRequest)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, struct {
+				Message string
+			}{
+				Message: "Invalid request body",
+			})
+			return
+		}
+		token, errRes := c.AuthService.GenerateTokenWithPath(createTokenRequest.Path)
+		if errRes != nil {
+			ctx.AbortWithStatusJSON(errRes.GetCode(), errRes.GetMessage())
+			return
+		}
+		ctx.JSON(http.StatusOK, struct {
+			Token string `json:"token"`
+		}{
+			Token: token,
+		})
+		return
+	}
+
 	token, err := c.AuthService.GenerateToken()
 	if err != nil {
 		ctx.AbortWithStatusJSON(err.GetCode(), err.GetMessage())
@@ -36,6 +62,25 @@ func (c *AuthController) ValidateToken(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
+	}
+
+	if c.StrictTokenMode {
+		valid, err := c.AuthService.ValidateTokenWithPath(token.Token, token.Path)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, struct {
+				Message string
+			}{
+				Message: "System error. Please contact admin!",
+			})
+			return
+		}
+		if valid {
+			ctx.JSON(http.StatusOK, nil)
+			return
+		} else {
+			ctx.JSON(http.StatusUnauthorized, nil)
+			return
+		}
 	}
 	valid, err := c.AuthService.ValidateToken(token.Token)
 	if err != nil {
