@@ -4,96 +4,85 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"proxy-fileserver/api/dtos"
+	"proxy-fileserver/api/validation"
+	"proxy-fileserver/enums"
 	"proxy-fileserver/services"
 )
 
 type AuthController struct {
-	AuthService     *services.AuthService
-	StrictTokenMode bool
+	AuthService *services.AuthService
+	Validator   *validation.Validator
 }
 
-func NewAuthController(authService *services.AuthService, strictTokenMode bool) *AuthController {
+func NewAuthController(authService *services.AuthService, validator *validation.Validator) *AuthController {
 	return &AuthController{
-		AuthService:     authService,
-		StrictTokenMode: strictTokenMode,
+		AuthService: authService,
+		Validator:   validator,
 	}
 }
 
 func (c *AuthController) GetToken(ctx *gin.Context) {
-	if c.StrictTokenMode {
-		var createTokenRequest *dtos.CreateTokenRequest
-		err := ctx.ShouldBindJSON(&createTokenRequest)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, struct {
-				Message string
-			}{
-				Message: "Invalid request body",
-			})
-			return
-		}
-		token, errRes := c.AuthService.GenerateTokenWithPath(createTokenRequest.Path)
-		if errRes != nil {
-			ctx.AbortWithStatusJSON(errRes.GetCode(), errRes.GetMessage())
-			return
-		}
-		ctx.JSON(http.StatusOK, struct {
-			Token string `json:"token"`
+	var createTokenRequest *dtos.CreateTokenRequest
+	err := ctx.ShouldBindJSON(&createTokenRequest)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, struct {
+			Message string `json:"message"`
 		}{
-			Token: token,
+			Message: "Invalid request body",
 		})
 		return
 	}
 
-	token, err := c.AuthService.GenerateToken()
-	if err != nil {
-		ctx.AbortWithStatusJSON(err.GetCode(), err.GetMessage())
+	if err = c.Validator.ValidateStruct(createTokenRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, struct {
+			Message string `json:"message"`
+		}{
+			Message: "invalid request: " + err.Error(),
+		})
 		return
 	}
-	ctx.JSON(http.StatusOK, struct {
-		Token string `json:"token"`
-	}{
+	var token string
+	var errRes enums.Response
+	switch createTokenRequest.Type {
+	case enums.MediumTokenType:
+		token, errRes = c.AuthService.GenerateToken()
+	case enums.HighTokenType:
+		token, errRes = c.AuthService.GenerateTokenWithPath(createTokenRequest.Path)
+	}
+	if errRes != nil {
+		ctx.AbortWithStatusJSON(errRes.GetCode(), errRes.GetMessage())
+		return
+	}
+	ctx.JSON(http.StatusOK, dtos.CreateTokenResponse{
 		Token: token,
 	})
 }
 
 func (c *AuthController) ValidateToken(ctx *gin.Context) {
-	var token *dtos.Token
-	err := ctx.ShouldBindJSON(&token)
+	var validateTokenRequest *dtos.ValidateTokenRequest
+	err := ctx.ShouldBindJSON(&validateTokenRequest)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	if c.StrictTokenMode {
-		valid, err := c.AuthService.ValidateTokenWithPath(token.Token, token.Path)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, struct {
-				Message string
-			}{
-				Message: "System error. Please contact admin!",
-			})
-			return
-		}
-		if valid {
-			ctx.JSON(http.StatusOK, nil)
-			return
-		} else {
-			ctx.JSON(http.StatusUnauthorized, nil)
-			return
-		}
-	}
-	valid, err := c.AuthService.ValidateToken(token.Token)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, struct {
+	if err = c.Validator.ValidateStruct(validateTokenRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, struct {
 			Message string
 		}{
-			Message: "System error. Please contact admin!",
+			Message: "invalid request: " + err.Error(),
 		})
 		return
 	}
-	if valid {
-		ctx.JSON(http.StatusOK, nil)
-	} else {
-		ctx.JSON(http.StatusUnauthorized, nil)
+	valid, errRes := c.AuthService.FullValidateToken(validateTokenRequest.Token, validateTokenRequest.Path)
+	if errRes != nil {
+		ctx.AbortWithStatusJSON(errRes.GetCode(), errRes.GetMessage())
+		return
 	}
+
+	if !valid {
+		ctx.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+	ctx.JSON(http.StatusOK, nil)
 }
