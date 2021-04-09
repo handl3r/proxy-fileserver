@@ -19,7 +19,7 @@ func GetIntWithDefault(key string, defaultValue int) int {
 	if rawValue == "" {
 		return defaultValue
 	}
-	value, err := strconv.Atoi(key)
+	value, err := strconv.Atoi(rawValue)
 	if err != nil {
 		return defaultValue
 	}
