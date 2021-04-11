@@ -184,38 +184,37 @@ curl 'http://localhost:8080/shared-folder/avt.jpg?token=eyJhbGciOiJSUzI1NiIsInR5
 
 #### API get token:
 
-* Request And response:
-    * Medium level token:
-        * Request:
-          ```shell
-          curl --location --request POST 'localhost:8080/auth' \
-          --header 'Content-Type: application/json' \
-          --data-raw '{
-          "type": "medium_level_token"
-          }'
-          ```
-        * Response:
-          ```json
-          {
-              "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTgxMzA4ODMsImlhdCI6MTYxODEyOTY4M30.Lyjr8-fIZdeUTueZHx47LwH0ynIEbgPp_gVYRZtdnikYt_zReFTIxLsOCMx1FZz9HSraE57TJc3D4avDZvbXuw"
-          }
-          ```
-    * High level token:
-        * Request:
-          ```shell
-          curl --location --request POST 'localhost:8080/auth' \
-          --header 'Content-Type: application/json' \
-          --data-raw '{
-              "type": "high_level_token",
-              "path": "/avt.jpg"
-          }'
-          ```
-        * Response:
-          ```json
-          {
-              "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTgxMzEyMjQsImlhdCI6MTYxODEzMDAyNCwicGF0aCI6Ii9hdnQuanBnIn0.fAbwt13Hw8qXfYzAXU9ap_eAGngilQRgVwq63yN_PSRCYF3ye1Hv2YGirwhukc8MwPb6c3m0gxTkdvooZxWdxg"
-          }
-          ```
+* Medium level token:
+    * Request:
+      ```shell
+      curl --location --request POST 'localhost:8080/auth' \
+      --header 'Content-Type: application/json' \
+      --data-raw '{
+      "type": "medium_level_token"
+      }'
+      ```
+    * Response:
+      ```json
+      {
+          "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTgxMzA4ODMsImlhdCI6MTYxODEyOTY4M30.Lyjr8-fIZdeUTueZHx47LwH0ynIEbgPp_gVYRZtdnikYt_zReFTIxLsOCMx1FZz9HSraE57TJc3D4avDZvbXuw"
+      }
+      ```
+* High level token:
+    * Request:
+      ```shell
+      curl --location --request POST 'localhost:8080/auth' \
+      --header 'Content-Type: application/json' \
+      --data-raw '{
+          "type": "high_level_token",
+          "path": "/avt.jpg"
+      }'
+      ```
+    * Response:
+      ```json
+      {
+          "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTgxMzEyMjQsImlhdCI6MTYxODEzMDAyNCwicGF0aCI6Ii9hdnQuanBnIn0.fAbwt13Hw8qXfYzAXU9ap_eAGngilQRgVwq63yN_PSRCYF3ye1Hv2YGirwhukc8MwPb6c3m0gxTkdvooZxWdxg"
+      }
+      ```
 
 #### API verify token:
 
