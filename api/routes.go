@@ -12,6 +12,7 @@ func NewRouterWithMiddleware(controllerProvider controllers.ControllerProvider, 
 	router := gin.Default()
 	router.RouterGroup.POST("/auth", controllerProvider.GetAuthController().GetToken)
 	router.RouterGroup.POST("/verify", controllerProvider.GetAuthController().ValidateToken)
+	router.RouterGroup.GET("/", controllerProvider.GetAuthController().Home)
 	router.NoRoute(controllerProvider.GetStreamFileController().GetFile)
 	switch tokenMode {
 	case configs.MediumTokenMode:

@@ -2,6 +2,8 @@ certificates/*
 .env
 temp/shared-folder/*
 .idea
+server.log
+proxy-server
 
 !temp/.keep
 !temp/shared-folder/test-folder/.keep

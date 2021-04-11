@@ -21,6 +21,10 @@ func NewAuthController(authService *services.AuthService, validator *validation.
 	}
 }
 
+func (c *AuthController) Home(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, `Hide on thesis degree! Get me on https://handl3r.netlify.app or https://github.com/handl3r or https://www.linkedin.com/in/thaibuixuan`)
+}
+
 func (c *AuthController) GetToken(ctx *gin.Context) {
 	var createTokenRequest *dtos.CreateTokenRequest
 	err := ctx.ShouldBindJSON(&createTokenRequest)
