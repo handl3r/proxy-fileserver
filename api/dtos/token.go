@@ -11,7 +11,7 @@ type ValidateTokenRequest struct {
 // input of controllers.AuthController.GetToken
 type CreateTokenRequest struct {
 	Type string `json:"type" validate:"oneof=medium_level_token high_level_token"`
-	Path string `json:"path" validate:"required_if=Type high_token"`
+	Path string `json:"path" validate:"required_if=Type high_level_token"`
 }
 
 // CreateTokenResponse represent response object of request create token
