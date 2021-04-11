@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"time"
 )
 
 func InitDBConnection(user, password, host, port, database string) *gorm.DB {
@@ -12,5 +13,9 @@ func InitDBConnection(user, password, host, port, database string) *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+	sqlDB, _ := db.DB()
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
 	return db
 }

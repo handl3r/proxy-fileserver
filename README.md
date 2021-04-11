@@ -53,19 +53,25 @@ go build -o proxy-fileserver cmd/main.go
     * MYSQL_HOST= host database
     * MYSQL_DATABASE= name database
     * HTTP_PORT=8080 port http
-    * REQUIRED_TOKEN=ON (ON/OFF) default is ON, if OFF, you do not need token to access resources
+    * TOKEN_MODE token mode in 1, 2, 3
     * GOOGLE_APPLICATION_CREDENTIALS= path to credential file (json) of service account cloud google
     * CREDENTIAL_GOOGLE_OAUTH2_FILE=certificates/credentials.json google oauth drive credential
     * TOKEN_GOOGLE_OAUTH2_FILE=certificates/token.json path to save token
     * GOOGLE_OAUTH2_ENABLE=ON default is ON // if set to OFF, use must config service account
-    * INTERACTIVE_MODE=OFF default is off. Set to ON when use want to interact with terminal to exchange google access token
+    * INTERACTIVE_MODE=OFF default is off. Set to ON when use want to interact with terminal to exchange google access
+      token
 
-- .env and binary file must be in the same folder
+* .env and binary file must be in the same folder
+* TOKEN_MODE:
+    * 1: no require token
+    * 2: token with no strict path: use medium_level_token
+    * 3: token strict path: use high_level_token
 
 ## 3. Setup
 
 * On Cloud Google:
-    * Create service account or create OAuth client ID if you want to use GOOGLE_OAUTH2_ENABLE and get certificate in json file (1)
+    * Create service account or create OAuth client ID if you want to use GOOGLE_OAUTH2_ENABLE and get certificate in
+      json file (1)
     * Enable Drive api
 
 * On Google Drive:
@@ -79,7 +85,7 @@ go build -o proxy-fileserver cmd/main.go
     * Put your public key and certificate from (1) on somewhere: example 'certificates/cer.json', '
       certificates/public512.pem'
     * Define your .env file (see .env.example)
-  
+
 * Use exg tool if you set INTERACTIVE_MODE=OFF to pre-generate token. [exg-tool](additional-tools/google_token_exchange)
 
 Example structure of tree folder tree:
@@ -178,29 +184,49 @@ curl 'http://localhost:8080/shared-folder/avt.jpg?token=eyJhbGciOiJSUzI1NiIsInR5
 
 #### API get token:
 
-* Request:
-  ```shell
-  curl --location --request POST 'ip:8080/auth'
-  ```
-* Response:
-
-```json
-{
-  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTUyNzE4MDMsImlhdCI6MTYxNTI3MTc0M30.ERHFO74v31F6n1psU94qT5mL4G7WMUbiOYnZsdGeIqmpSuJ1DhZvmRSORkZsYFRJcmCbjMJgr6Ukq0-pBHES3g"
-}
-```
+* Request And response:
+    * Medium level token:
+        * Request:
+          ```shell
+          curl --location --request POST 'localhost:8080/auth' \
+          --header 'Content-Type: application/json' \
+          --data-raw '{
+          "type": "medium_level_token"
+          }'
+          ```
+        * Response:
+          ```json
+          {
+              "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTgxMzA4ODMsImlhdCI6MTYxODEyOTY4M30.Lyjr8-fIZdeUTueZHx47LwH0ynIEbgPp_gVYRZtdnikYt_zReFTIxLsOCMx1FZz9HSraE57TJc3D4avDZvbXuw"
+          }
+          ```
+    * High level token:
+        * Request:
+          ```shell
+          curl --location --request POST 'localhost:8080/auth' \
+          --header 'Content-Type: application/json' \
+          --data-raw '{
+              "type": "high_level_token",
+              "path": "/avt.jpg"
+          }'
+          ```
+        * Response:
+          ```json
+          {
+              "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTgxMzEyMjQsImlhdCI6MTYxODEzMDAyNCwicGF0aCI6Ii9hdnQuanBnIn0.fAbwt13Hw8qXfYzAXU9ap_eAGngilQRgVwq63yN_PSRCYF3ye1Hv2YGirwhukc8MwPb6c3m0gxTkdvooZxWdxg"
+          }
+          ```
 
 #### API verify token:
 
 * Request:
-
-```shell
-curl --location --request POST 'localhost:8080/verify' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTU0NzE2MTYsImlhdCI6MTYxNTQ3MTAxNn0.jyX3RIaENdI6JTZdziN3c86cvpqj2M7hpFZTuCATMqtU8uzbs9tLjev21Gng9xwSikb5nY4BcCQRtx9ie29SwQ"
-}'
-```
+  ```shell
+  curl --location --request POST 'localhost:8080/verify' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+      "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTU0NzE2MTYsImlhdCI6MTYxNTQ3MTAxNn0.jyX3RIaENdI6JTZdziN3c86cvpqj2M7hpFZTuCATMqtU8uzbs9tLjev21Gng9xwSikb5nY4BcCQRtx9ie29SwQ"
+  }'
+  ```
 
 * Response:
     * Valid:
@@ -219,8 +245,8 @@ curl --location --request POST 'localhost:8080/verify' \
 * Delete all records in database and all file in shared-folder before re-run
 
 * More information to config cloud google:
-  * https://developers.google.com/drive/api/v3/quickstart/go
-  
+    * https://developers.google.com/drive/api/v3/quickstart/go
+
 * Confuse about INTERACTIVE_MODE:
-  * When interactive mode set to OFF, you must had access token and refresh token storage in TOKEN_GOOGLE_OAUTH2_FILE
-  * Encourage to use google_token_exchange tool to pre-generate token, then use INTERACTIVE_MODE=OFF in proxy server
+    * When interactive mode set to OFF, you must had access token and refresh token storage in TOKEN_GOOGLE_OAUTH2_FILE
+    * Encourage to use google_token_exchange tool to pre-generate token, then use INTERACTIVE_MODE=OFF in proxy server

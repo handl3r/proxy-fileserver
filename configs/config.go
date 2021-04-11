@@ -5,6 +5,21 @@ import (
 	"time"
 )
 
+const (
+	// NoTokenMode no token required
+	NoTokenMode = 1
+	// MediumTokenMode required token with no strict path
+	MediumTokenMode = 2
+	// HighTokenMode required token with strict path
+	HighTokenMode = 3
+)
+
+var MapTokenMode = map[int]bool{
+	NoTokenMode:     true,
+	MediumTokenMode: true,
+	HighTokenMode:   true,
+}
+
 type Config struct {
 	Env                      string
 	SharedRootFolder         string
@@ -25,8 +40,8 @@ type Config struct {
 	MysqlHost          string
 	MysqlDatabase      string
 
-	HttpPort      string
-	RequiredToken bool
+	HttpPort  string
+	TokenMode int
 
 	InteractiveMode        bool
 	GoogleDriveOAuthConfig GoogleDriveOAuth2Config
@@ -45,13 +60,9 @@ func Get() *Config {
 }
 
 func LoadConfigs() {
-	//cacheTimeLocalFileSystem, err := config.GetTimeDuration("CACHE_TIME_LOCAL_FILE_SYSTEM")
-	//if err != nil {
-	//	panic(err)
-	//}
-	requiredToken, err := config.GetBoolWithD("REQUIRED_TOKEN", true)
-	if err != nil {
-		panic(err)
+	tokenMode := config.GetIntWithDefault("TOKEN_MODE", 1)
+	if _, ok := MapTokenMode[tokenMode]; !ok {
+		panic("Invalid TokenMode")
 	}
 	expiredTimeToken, err := config.GetTimeDuration("EXPIRED_TIME_TOKEN")
 	if err != nil {
@@ -88,8 +99,8 @@ func LoadConfigs() {
 		MysqlHost:     config.GetString("MYSQL_HOST"),
 		MysqlDatabase: config.GetString("MYSQL_DATABASE"),
 
-		HttpPort:      config.GetString("HTTP_PORT"),
-		RequiredToken: requiredToken,
+		HttpPort:  config.GetString("HTTP_PORT"),
+		TokenMode: tokenMode,
 
 		InteractiveMode:        interactiveMode,
 		GoogleDriveOAuthConfig: gOAuth2Config,

@@ -42,7 +42,7 @@ func (c *StreamFileController) GetFile(ctx *gin.Context) {
 
 func (c *StreamFileController) GetFileBasicHttp(w http.ResponseWriter, r *http.Request) {
 	rawPath := r.URL.Path
-	path := rawPath[1:len(rawPath)]
+	path := rawPath[1:]
 	err := c.fileSystemService.StreamFile(w, path)
 	if err != nil {
 		w.WriteHeader(err.GetCode())

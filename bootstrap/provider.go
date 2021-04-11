@@ -6,6 +6,7 @@ import (
 	"proxy-fileserver/adapter"
 	"proxy-fileserver/api/controllers"
 	"proxy-fileserver/api/middlewares"
+	"proxy-fileserver/api/validation"
 	"proxy-fileserver/configs"
 	"proxy-fileserver/repository"
 	"proxy-fileserver/services"
@@ -17,11 +18,16 @@ func InitService(ctx context.Context, db *gorm.DB) *Context {
 	if err != nil {
 		panic(err)
 	}
+
 	repoProvider := repository.NewProviderRepository(db)
+
 	serviceProvider := services.NewServiceProvider(adapterProvider, repoProvider, conf.PrivateKeyLocation, conf.AuthPublicKeyLocation,
 		conf.ExpiredTimeToken, conf.SharedRootFolder)
 
-	controllerProvider := controllers.NewControllerProvider(ctx, serviceProvider.GeFileSystemService(), serviceProvider.GetAuthService())
+	validator := validation.NewValidator()
+
+	controllerProvider := controllers.NewControllerProvider(ctx, serviceProvider.GeFileSystemService(), serviceProvider.GetAuthService(),
+		conf, validator)
 	middlewareProvider := middlewares.NewMiddlewareProvider(conf.AuthPublicKeyLocation)
 	context := &Context{
 		CommonContext: ctx,

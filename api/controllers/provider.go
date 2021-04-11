@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"proxy-fileserver/api/validation"
+	"proxy-fileserver/configs"
 	"proxy-fileserver/services"
 )
 
@@ -15,10 +17,12 @@ type controllerProviderImpl struct {
 	authController       *AuthController
 }
 
-func NewControllerProvider(ctx context.Context, fileSystemService *services.FileSystemService, authService *services.AuthService) ControllerProvider {
+func NewControllerProvider(ctx context.Context, fileSystemService *services.FileSystemService, authService *services.AuthService,
+	conf *configs.Config, validator *validation.Validator,
+) ControllerProvider {
 	return &controllerProviderImpl{
 		streamFileController: NewStreamFileController(fileSystemService),
-		authController:       NewAuthController(authService),
+		authController:       NewAuthController(authService, validator),
 	}
 }
 
