@@ -37,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: $ARTIFACT_BUILD_RESULT
-          path: ./$BUILD_FILE_NAME
+          path: $BUILD_FILE_NAME
 
 
 
