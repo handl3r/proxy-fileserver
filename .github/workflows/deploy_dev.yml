@@ -3,8 +3,9 @@ name: Deploy Dev
 on:
   push:
 
+
 env:
-  KEY_BUILD_FILE: build_result
+  ARTIFACT_BUILD_RESULT: artifact-build-result
 
 jobs:
   build-and-test:
@@ -31,23 +32,29 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: $ARTIFACT_BUILD_RESULT
+          path: ./proxy-server
+
+
 
   deploy:
     needs:
       - build-and-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Combine Environments
         env:
           DEV_ENV_FILE: ${{ secrets.ENV_DEV}}
         run: echo $DEV_ENV_FILE | base64 --decode > .env
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: $ARTIFACT_BUILD_RESULT
+
+      - name: show result
+        run: ls
 
       - name: SSH to server
         run: echo "SSH to dev here ...."
