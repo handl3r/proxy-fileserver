@@ -62,7 +62,7 @@ jobs:
           username: ${{ secrets.SSH_USER_DEV }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "./proxy-server,./.env,./deployment/deploy.sh"
+          source: "proxy-server,.env,deployment/deploy.sh"
           target: ${{ env.WORKING_DIR_SERVER }}
 
       - name: SSH to server
