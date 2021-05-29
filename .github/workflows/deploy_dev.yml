@@ -2,8 +2,6 @@ name: Deploy Dev
 
 on:
   push:
-    branches:
-      - develop
 
 env:
   KEY_BUILD_FILE: build_result
