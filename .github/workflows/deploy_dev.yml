@@ -33,7 +33,6 @@ jobs:
         with:
           path: ./*
           key: $KEY_BUILD_FILE
-        - run: ls && cat ./x
 
 
 
