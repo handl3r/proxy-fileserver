@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"proxy-fileserver/api/dtos"
 	"proxy-fileserver/api/validation"
-	"proxy-fileserver/common/log"
 	"proxy-fileserver/enums"
 	"proxy-fileserver/services"
 )
@@ -23,7 +22,6 @@ func NewAuthController(authService *services.AuthService, validator *validation.
 }
 
 func (c *AuthController) Home(ctx *gin.Context) {
-	log.Errorf("test-error: %s", "thai")
 	ctx.JSON(http.StatusOK, `Hide on thesis degree! Get me on https://handl3r.netlify.app or https://github.com/handl3r or https://www.linkedin.com/in/thaibuixuan`)
 }
 
