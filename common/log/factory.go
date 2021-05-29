@@ -14,6 +14,14 @@ func Infof(msg string, args ...interface{}) {
 	globalLogger.Infof(msg, args...)
 }
 
+func Warn(args ...interface{}) {
+	globalLogger.Warn(args...)
+}
+
+func Warnf(msg string, args ...interface{}) {
+	globalLogger.Warnf(msg, args...)
+}
+
 func Error(args ...interface{}) {
 	globalLogger.Error(args...)
 }

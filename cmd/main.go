@@ -36,7 +36,6 @@ func main() {
 	appContext := bootstrap.InitService(ctx, dbConnection)
 
 	jobs.LoadLockFromDB(appContext.AppContext.RepoProvider.GetFileInfoRepository())
-
 	c := cron.New()
 	cleaner := jobs.NewCleaner(appContext.AppContext.RepoProvider.GetFileInfoRepository(), configs.Get().CacheTimeLocalFileSystem,
 		configs.Get().SharedRootFolder, appContext.AppContext.AdapterProvider.GetLocalFileSystem())
