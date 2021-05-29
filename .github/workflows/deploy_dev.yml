@@ -46,6 +46,7 @@ jobs:
       - build-and-test
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout/@v2
       - name: Combine Environments
         env:
           DEV_ENV_FILE: ${{ secrets.ENV_DEV}}
