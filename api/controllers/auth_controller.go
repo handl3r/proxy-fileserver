@@ -23,7 +23,6 @@ func NewAuthController(authService *services.AuthService, validator *validation.
 }
 
 func (c *AuthController) Home(ctx *gin.Context) {
-	log.Errorf("test-error: %s", "thai")
 	ctx.JSON(http.StatusOK, `Hide on thesis degree! Get me on https://handl3r.netlify.app or https://github.com/handl3r or https://www.linkedin.com/in/thaibuixuan`)
 }
 
@@ -87,6 +86,7 @@ func (c *AuthController) ValidateToken(ctx *gin.Context) {
 	}
 
 	if !valid {
+		log.Warnf("Invalid request validate token: %s, path: %s", validateTokenRequest.Token, validateTokenRequest.Path)
 		ctx.JSON(http.StatusUnauthorized, nil)
 		return
 	}

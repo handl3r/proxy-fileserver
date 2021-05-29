@@ -28,6 +28,14 @@ func (l *Logger) Infof(msg string, args ...interface{}) {
 	l.zap.Infof(msg, args...)
 }
 
+func (l *Logger) Warn(args ...interface{}) {
+	l.zap.Warn(args...)
+}
+
+func (l *Logger) Warnf(msg string, args ...interface{}) {
+	l.zap.Warnf(msg, args...)
+}
+
 func (l *Logger) Error(args ...interface{}) {
 	l.zap.Error(args...)
 }
@@ -52,10 +60,11 @@ func NewLogger() (*Logger, error) {
 	if conf.TelegramBotConfig.BotToken != "" {
 		_Hook = hooks.NewTelegramHook(conf.TelegramBotConfig.BaseURL, conf.TelegramBotConfig.BotToken, conf.TelegramBotConfig.ChannelID)
 		hookOption := zap.Hooks(func(e zapcore.Entry) error {
-			if e.Level != zapcore.ErrorLevel {
+			if e.Level != zapcore.ErrorLevel && e.Level != zapcore.WarnLevel {
 				return nil
 			}
-			message := fmt.Sprintf("[%s]\n[Message] %s\n [STACK] %s", strings.ToUpper(e.Level.String()), e.Message, e.Stack)
+			message := fmt.Sprintf("<u>[SERVER-%s]\n[LEVEL:%s]</u>\n<u>[MESSAGE]</u> %s\n<u>[STACK]</u>\n %s", conf.Env,
+				strings.ToUpper(e.Level.String()), e.Message, e.Stack)
 			go func() {
 				_ = _Hook.SendMessage(message)
 			}()

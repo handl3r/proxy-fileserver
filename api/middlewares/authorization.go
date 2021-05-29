@@ -39,6 +39,7 @@ func (p *AuthorizationProcessor) ValidateRequestWithToken(c *gin.Context) {
 		return
 	}
 	if !valid {
+		log.Warnf("Invalid token: %s", listToken[0])
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -59,6 +60,7 @@ func (p *AuthorizationProcessor) ValidateRequestWithStrictToken(c *gin.Context) 
 		return
 	}
 	if !valid {
+		log.Warnf("Invalid token: %s", listToken[0])
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -75,6 +77,7 @@ func (p *AuthorizationProcessor) ValidateRequestWithStrictToken(c *gin.Context) 
 	pathClaimStr, _ := pathClaim.(string)
 	path := c.Request.URL.Path
 	if path != pathClaimStr {
+		log.Warnf("Invalid claim with path: %v, pathURL: %v", pathClaimStr, path)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
