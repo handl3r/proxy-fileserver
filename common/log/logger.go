@@ -63,7 +63,7 @@ func NewLogger() (*Logger, error) {
 			if e.Level != zapcore.ErrorLevel && e.Level != zapcore.WarnLevel {
 				return nil
 			}
-			message := fmt.Sprintf("<u>[SERVER-%s]\n[LEVEL:%s]</u>\n<u>[MESSAGE] %s</u>\n<u>[STACK]</u>\n %s", conf.Env,
+			message := fmt.Sprintf("<u>[SERVER-%s]\n[LEVEL:%s]</u>\n<u>[MESSAGE]</u> %s\n<u>[STACK]</u>\n %s", conf.Env,
 				strings.ToUpper(e.Level.String()), e.Message, e.Stack)
 			go func() {
 				_ = _Hook.SendMessage(message)

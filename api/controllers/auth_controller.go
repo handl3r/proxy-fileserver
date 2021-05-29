@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"proxy-fileserver/api/dtos"
 	"proxy-fileserver/api/validation"
+	"proxy-fileserver/common/log"
 	"proxy-fileserver/enums"
 	"proxy-fileserver/services"
 )
@@ -85,6 +86,7 @@ func (c *AuthController) ValidateToken(ctx *gin.Context) {
 	}
 
 	if !valid {
+		log.Warnf("Invalid request validate token: %s, path: %s", validateTokenRequest.Token, validateTokenRequest.Path)
 		ctx.JSON(http.StatusUnauthorized, nil)
 		return
 	}
