@@ -5,23 +5,41 @@ on:
     branches:
       - develop
 
+env:
+  ARTIFACT_BUILD_RESULT: artifact-build-result
+  BUILD_FILE_NAME: proxy-server
+  WORKING_DIR_SERVER: /home/thaibx/proxy-server
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.15
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Build
-        run: go build -o proxyserver ./cmd/main.go
+        run: go build -o ${{ env.BUILD_FILE_NAME }} ./cmd/main.go
+
       - name: Test
         run: go test ./...
+
       - name: Vet
         run: go vet ./...
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.ARTIFACT_BUILD_RESULT }}
+          path: ${{ env.BUILD_FILE_NAME }}
+
 
 
   deploy:
@@ -30,8 +48,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout/@v2
+      - name: Combine Environments
+        env:
+          DEV_ENV_FILE: ${{ secrets.ENV_DEV}}
+        run: echo $DEV_ENV_FILE | base64 --decode > .env
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.ARTIFACT_BUILD_RESULT }}
+
+      - name: SCP files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_DEV }}
+          username: ${{ secrets.SSH_USER_DEV }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "proxy-server,.env,deployment/deploy.sh"
+          target: ${{ env.WORKING_DIR_SERVER }}
 
       - name: SSH to server
-        run: echo "SSH to dev here ...."
-      - name: SCP
-        run: echo "SCP here ..."
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_DEV }}
+          username: ${{ secrets.SSH_USER_DEV }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: bash ${{ env.WORKING_DIR_SERVER}}/deployment/deploy.sh
