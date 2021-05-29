@@ -45,12 +45,19 @@ type Config struct {
 
 	InteractiveMode        bool
 	GoogleDriveOAuthConfig GoogleDriveOAuth2Config
+	TelegramBotConfig      TelegramBotConfig
 }
 
 type GoogleDriveOAuth2Config struct {
 	CredentialFile string
 	TokenFile      string
 	Enable         bool
+}
+
+type TelegramBotConfig struct {
+	BaseURL   string
+	BotToken  string
+	ChannelID string
 }
 
 var Common *Config
@@ -81,6 +88,10 @@ func LoadConfigs() {
 	if err != nil {
 		panic(nil)
 	}
+	telegramBaseURL := config.GetString("TELEGRAM_BASE_URL")
+	telegramBotToken := config.GetString("TELEGRAM_BOT_TOKEN")
+	telegramChannelID := config.GetString("TELEGRAM_CHANNEL_ID")
+
 	Common = &Config{
 		Env:                      config.GetString("PROXY_SERVER_ENV"),
 		SharedRootFolder:         config.GetString("SHARED_ROOT_FOLDER"),
@@ -104,5 +115,10 @@ func LoadConfigs() {
 
 		InteractiveMode:        interactiveMode,
 		GoogleDriveOAuthConfig: gOAuth2Config,
+		TelegramBotConfig: TelegramBotConfig{
+			BaseURL:   telegramBaseURL,
+			BotToken:  telegramBotToken,
+			ChannelID: telegramChannelID,
+		},
 	}
 }
