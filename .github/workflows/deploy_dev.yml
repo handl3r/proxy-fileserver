@@ -33,6 +33,8 @@ jobs:
         with:
           path: ./*
           key: $KEY_BUILD_FILE
+        - run: ls && cat ./x
+
 
 
   deploy:
@@ -45,7 +47,7 @@ jobs:
         with:
           path: ./
           key: $KEY_BUILD_FILE
-      - run: ls
+      - run: ls && cat ./x
 
       - name: Combine Environments
         env:
