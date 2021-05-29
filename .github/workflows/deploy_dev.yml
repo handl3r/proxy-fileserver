@@ -7,7 +7,7 @@ on:
 env:
   ARTIFACT_BUILD_RESULT: artifact-build-result
   BUILD_FILE_NAME: proxy-server
-  WORKING_DIR_SERVER: /home/thaibx/proxy-server-test
+  WORKING_DIR_SERVER: /home/thaibx/proxy-server
 
 jobs:
   build-and-test:
