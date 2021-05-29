@@ -6,6 +6,8 @@ on:
 
 env:
   ARTIFACT_BUILD_RESULT: artifact-build-result
+  BUILD_FILE_NAME: proxy-server
+  WORKING_DIR_SERVER: /home/thaibx/proxy-server-test
 
 jobs:
   build-and-test:
@@ -24,7 +26,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Build
-        run: go build -o proxy-server ./cmd/main.go
+        run: go build -o $BUILD_FILE_NAME ./cmd/main.go
 
       - name: Test
         run: go test ./...
@@ -35,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: $ARTIFACT_BUILD_RESULT
-          path: ./proxy-server
+          path: ./$BUILD_FILE_NAME
 
 
 
@@ -53,10 +55,21 @@ jobs:
         with:
           name: $ARTIFACT_BUILD_RESULT
 
-      - name: show result
-        run: ls
+      - name: SCP files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_DEV }}
+          username: ${{ secrets.SSH_USER_DEV }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "./proxy-server,./.env,./deployment/deploy.sh"
+          target: $WORKING_DIR_SERVER
 
       - name: SSH to server
-        run: echo "SSH to dev here ...."
-      - name: SCP
-        run: echo "SCP here ..."
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_DEV }}
+          username: ${{ secrets.SSH_USER_DEV }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: bash $WORKING_DIR_SERVER/deploy.sh
