@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v2
         id: restore-build
         with:
-          path: $GITHUB_WORKSPACE/proxy-server
+          path: ./*
           key: $KEY_BUILD_FILE
 
 
@@ -40,11 +40,10 @@ jobs:
       - build-and-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout/@v2
       - uses: actions/cache@v2
         id: restore-build
         with:
-          path: ./*
+          path: ./
           key: $KEY_BUILD_FILE
       - run: ls
 
