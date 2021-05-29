@@ -8,6 +8,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.0
 	github.com/joho/godotenv v1.3.0
 	github.com/robfig/cron v1.2.0
+	github.com/valyala/fasthttp v1.25.0
 	go.uber.org/zap v1.16.0
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5
 	google.golang.org/api v0.40.0

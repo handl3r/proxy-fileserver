@@ -1,8 +1,12 @@
 package log
 
 import (
+	"fmt"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"proxy-fileserver/common/log/hooks"
 	"proxy-fileserver/configs"
+	"strings"
 )
 
 var (
@@ -10,6 +14,7 @@ var (
 	devEnv     = "dev"
 	productEnv = "prod"
 )
+var _Hook *hooks.TelegramHook
 
 type Logger struct {
 	zap *zap.SugaredLogger
@@ -42,18 +47,35 @@ func (l Logger) Fatalf(msg string, args ...interface{}) {
 func NewLogger() (*Logger, error) {
 	var zapSugarLogger *zap.SugaredLogger
 	conf := configs.Get()
+	options := make([]zap.Option, 0)
+	options = append(options, zap.AddCallerSkip(2))
+	if conf.TelegramBotConfig.BotToken != "" {
+		_Hook = hooks.NewTelegramHook(conf.TelegramBotConfig.BaseURL, conf.TelegramBotConfig.BotToken, conf.TelegramBotConfig.ChannelID)
+		hookOption := zap.Hooks(func(e zapcore.Entry) error {
+			if e.Level != zapcore.ErrorLevel {
+				return nil
+			}
+			message := fmt.Sprintf("[%s]\n[Message] %s\n [STACK] %s", strings.ToUpper(e.Level.String()), e.Message, e.Stack)
+			go func() {
+				_ = _Hook.SendMessage(message)
+			}()
+			return nil
+		})
+		options = append(options, hookOption)
+	}
+
 	if conf.Env == localEnv || conf.Env == devEnv {
 		zapLogger, err := zap.NewDevelopment()
 		if err != nil {
 			return nil, err
 		}
-		zapSugarLogger = zapLogger.Sugar()
+		zapSugarLogger = zapLogger.WithOptions(options...).Sugar()
 	} else if conf.Env == productEnv {
 		zapLogger, err := zap.NewProduction()
 		if err != nil {
 			return nil, err
 		}
-		zapSugarLogger = zapLogger.Sugar()
+		zapSugarLogger = zapLogger.WithOptions(options...).Sugar()
 	}
 	return &Logger{
 		zap: zapSugarLogger,
