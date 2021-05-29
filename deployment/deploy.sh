@@ -2,5 +2,6 @@
 
 cd /home/thaibx/proxy-server-test
 touch x
-cat "dasndasd"> ./x
+echo "dasndasd" > ./x
+sudo chmod 777 ./x
 ls
