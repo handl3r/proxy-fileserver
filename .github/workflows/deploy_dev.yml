@@ -28,11 +28,11 @@ jobs:
         run: go vet ./...
 
       - name: Cache result build
-      uses: actions/cache@v2
-      id: restore-build
-      with:
-        path: $GITHUB_WORKSPACE/proxy-server
-        key: $KEY_BUILD_FILE
+        uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: $GITHUB_WORKSPACE/proxy-server
+          key: $KEY_BUILD_FILE
 
 
   deploy:
@@ -53,7 +53,8 @@ jobs:
           DEV_ENV_FILE: ${{ secrets.ENV_DEV}}
         run: echo $DEV_ENV_FILE | base64 --decode > .env
 
-      - name: cat ./.env
+      - name: info here
+        run: cat ./.env
       - name: SSH to server
         run: echo "SSH to dev here ...."
       - name: SCP
