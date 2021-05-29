@@ -2,7 +2,8 @@ name: Deploy Dev
 
 on:
   push:
-
+    branches:
+      - develop
 
 env:
   ARTIFACT_BUILD_RESULT: artifact-build-result
