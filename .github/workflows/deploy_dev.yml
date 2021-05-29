@@ -5,23 +5,36 @@ on:
     branches:
       - develop
 
+env:
+  KEY_BUILD_FILE: build_result
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.15
+      - name: Info
+        run: pwd
 
       - name: Build
-        run: go build -o proxyserver ./cmd/main.go
+        run: go build -o proxy-server ./cmd/main.go
+
       - name: Test
         run: go test ./...
+
       - name: Vet
         run: go vet ./...
+
+      - name: Cache result build
+      uses: actions/cache@v2
+      id: restore-build
+      with:
+        path: $GITHUB_WORKSPACE/proxy-server
+        key: $KEY_BUILD_FILE
 
 
   deploy:
@@ -30,7 +43,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout/@v2
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: $KEY_BUILD_FILE
+      - run: ls
 
+      - name: Combine Environments
+        env:
+          DEV_ENV_FILE: ${{ secrets.ENV_DEV}}
+        run: echo $DEV_ENV_FILE | base64 --decode > .env
+
+      - name: cat ./.env
       - name: SSH to server
         run: echo "SSH to dev here ...."
       - name: SCP
