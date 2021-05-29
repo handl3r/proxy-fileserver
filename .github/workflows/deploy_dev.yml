@@ -26,7 +26,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Build
-        run: go build -o $BUILD_FILE_NAME ./cmd/main.go
+        run: go build -o ${{ env.BUILD_FILE_NAME }} ./cmd/main.go
 
       - name: Test
         run: go test ./...
@@ -36,8 +36,8 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: $ARTIFACT_BUILD_RESULT
-          path: $BUILD_FILE_NAME
+          name: ${{ env.ARTIFACT_BUILD_RESULT }}
+          path: ${{ env.BUILD_FILE_NAME }}
 
 
 
@@ -53,7 +53,7 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: $ARTIFACT_BUILD_RESULT
+          name: ${{ env.ARTIFACT_BUILD_RESULT }}
 
       - name: SCP files
         uses: appleboy/scp-action@master
@@ -63,7 +63,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "./proxy-server,./.env,./deployment/deploy.sh"
-          target: $WORKING_DIR_SERVER
+          target: ${{ env.WORKING_DIR_SERVER }}
 
       - name: SSH to server
         uses: appleboy/ssh-action@master
@@ -72,4 +72,4 @@ jobs:
           username: ${{ secrets.SSH_USER_DEV }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: bash $WORKING_DIR_SERVER/deploy.sh
+          script: bash ${{ env.WORKING_DIR_SERVER}}/deploy.sh
