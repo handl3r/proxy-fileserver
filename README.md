@@ -60,6 +60,9 @@ go build -o proxy-fileserver cmd/main.go
     * GOOGLE_OAUTH2_ENABLE=ON default is ON // if set to OFF, use must config service account
     * INTERACTIVE_MODE=OFF default is off. Set to ON when use want to interact with terminal to exchange google access
       token
+    * TELEGRAM_BASE_URL= https://api.telegram.org base url for telegram api
+    * TELEGRAM_BOT_TOKEN= your token bot
+    * TELEGRAM_CHANNEL_ID= id of channel that bot will send message to
 
 * .env and binary file must be in the same folder
 * TOKEN_MODE:
