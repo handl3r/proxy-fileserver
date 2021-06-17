@@ -98,9 +98,11 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		}
 		log.Infof("Finished streaming file from drive to local file system with filepath: %s, id: %s", filePath, id)
 		now := time.Now()
-		err := s.FileInForRepo.Create(models.FileInfo{
+		err = s.FileInForRepo.Create(models.FileInfo{
 			FilePath:       rawFilePath,
 			LastDownloadAt: now,
+			CreatedAt: now,
+			UpdatedAt: now,
 		})
 		if err != nil {
 			log.Errorf("Can not create last_download_at for file %s with error: %v", filePath, err)
