@@ -88,7 +88,7 @@ func (s *FileSystemService) GetSourceStream(filePath string) (io.Reader, enums.R
 		if err != nil {
 			log.Errorf("Failure when streaming file from drive to local file system with filepath: %s, id: %s, err: %v", filePath, id, err)
 			log.Infof("Start cleaning processing file")
-			err = s.DeleteProcessingFile(filePath)
+			err = s.DeleteProcessingFile(filePath
 			if err == nil {
 				log.Infof("Finish cleaning processing file for file path %s with no error", filePath)
 			} else {
